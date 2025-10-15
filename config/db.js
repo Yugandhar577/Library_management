@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const initdata = require('./data.js');
-const book = require('../models/book.js');
+const books = require('../models/book.js');
 main().then(() =>{
     console.log("Connected to MongoDB");
 }).catch(err => {
@@ -12,8 +12,8 @@ async function main(){
 }
 
 async function initdb() {
-    await book.deleteMany({});
-    await book.insertMany(initdata.data);
+    // await books.deleteMany({});
+    await books.insertMany(initdata.data);
     console.log("Database initialized");
 }
 

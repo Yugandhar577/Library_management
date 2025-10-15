@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   name: String,
   email: { type: String, unique: true },
   password: String,
@@ -9,4 +10,5 @@ const userSchema = new mongoose.Schema({
   fineBalance: { type: Number, default: 0 }
 });
 
-export default mongoose.model("User", userSchema);
+const users = mongoose.model("User", userSchema);
+module.exports = users;

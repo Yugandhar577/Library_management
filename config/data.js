@@ -1,4 +1,4 @@
-[
+const AllBooks = [
   {
     "title": "The Crimson River",
     "author": "Elena Vance",
@@ -1043,5 +1043,7 @@
     "availableCopies": 24,
     "totalCopies": 25,
     "description": "A love story between a brilliant composer and his muse, told through their letters and music."
-  }
-]
+  },
+];
+
+module.exports = { data: AllBooks };

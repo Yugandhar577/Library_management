@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/css/style.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-<%- include('../includes/navbar') %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library Management System</title>
+
+    <!-- RetroUI CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/retroui@latest/dist/retroui.min.css"
+    />
+
+    <!-- Retro Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="/public/css/style.css" />
+  </head>
+
+  <body>
 
     <!-- Main Content -->
-    <main class="container">
+    <main id="main-content">
+      <section>
         <%- body %>
+      </section>
     </main>
-
-    <!-- Footer -->
-    <%- include('../includes/footer') %>
-</body>
+  </body>
 </html>

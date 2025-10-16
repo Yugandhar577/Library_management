@@ -1,4 +1,296 @@
-<!-- home.ejs -->
-<h1>Welcome to the Library Management System</h1>
-<p>This is the home page for the library clerk.</p>
-<p>Use the navigation menu to manage books, members, and transactions.</p>
+<div class="dashboard-container">
+  <!-- Collapsible Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="logo">
+      <h2>LMS</h2>
+    </div>
+    <nav class="menu">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Books</a>
+      <a href="#">Members</a>
+      <a href="#">Transactions</a>
+      <a href="#">Issue Book</a>
+      <a href="#">Reports</a>
+      <a href="#">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Area -->
+  <main class="main-content">
+    <header class="topbar">
+      <button id="toggleBtn">☰</button>
+      <input type="text" placeholder="Search..." />
+      <span class="user">Hi, Librarian</span>
+    </header>
+
+    <section class="dashboard">
+      <h1 class="retro-title">Library Management Dashboard</h1>
+
+      <!-- Retro Stats -->
+      <div class="stats">
+        <div class="stat-box">
+          <h3>Total Books</h3>
+          <p>1,245</p>
+        </div>
+        <div class="stat-box">
+          <h3>Available</h3>
+          <p>982</p>
+        </div>
+        <div class="stat-box">
+          <h3>Members</h3>
+          <p>320</p>
+        </div>
+        <div class="stat-box">
+          <h3>Overdue</h3>
+          <p>24</p>
+        </div>
+      </div>
+
+      <!-- Tables & Panels -->
+      <div class="retro-panels">
+        <div class="retro-window">
+          <div class="window-title">Recent Transactions</div>
+          <div class="window-body">
+            <table class="retro-table">
+              <thead>
+                <tr><th>Member</th><th>Book</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>John Smith</td><td>The Great Gatsby</td><td><span class="status green">Returned</span></td><td>Oct 14</td></tr>
+                <tr><td>Emily Johnson</td><td>To Kill a Mockingbird</td><td><span class="status yellow">Issued</span></td><td>Oct 13</td></tr>
+                <tr><td>Michael Brown</td><td>1984</td><td><span class="status red">Overdue</span></td><td>Oct 02</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="retro-window">
+          <div class="window-title">System Alerts</div>
+          <div class="window-body">
+            <ul class="alerts">
+              <li class="red">24 Books Overdue</li>
+              <li class="yellow">3 Pending Reservations</li>
+              <li class="green">Backup Successful</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+  :root {
+    --mocha: #3b2f2f;
+    --offwhite: #f7f3e9;
+    --black: #1b1b1b;
+    --accent: #d97a00;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'VT323', monospace;
+    background-color: var(--offwhite);
+    color: var(--black);
+  }
+
+  .dashboard-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 230px;
+    background: var(--mocha);
+    color: var(--offwhite);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    box-shadow: 4px 0 0 var(--black);
+  }
+
+  .sidebar.collapsed {
+    width: 70px;
+  }
+
+  .logo {
+    text-align: center;
+    background: var(--black);
+    padding: 1rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--offwhite);
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0.5rem;
+  }
+
+  .menu a {
+    color: var(--offwhite);
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    margin: 0.2rem 0;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .menu a:hover,
+  .menu a.active {
+    background: #2b2222;
+    border-left: 4px solid var(--accent);
+  }
+
+  /* MAIN CONTENT */
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--black);
+    color: var(--offwhite);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    height: 45px;
+  }
+
+  .topbar input {
+    border: 1px solid var(--offwhite);
+    background: var(--offwhite);
+    color: var(--black);
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-family: 'VT323', monospace;
+  }
+
+  #toggleBtn {
+    background: none;
+    color: var(--offwhite);
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  /* DASHBOARD CONTENT */
+  .dashboard {
+    padding: 1.5rem;
+  }
+
+  .retro-title {
+    font-size: 1.6rem;
+    border-bottom: 2px solid var(--black);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-box {
+    background: var(--mocha);
+    color: var(--offwhite);
+    border: 3px solid var(--black);
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 4px 4px 0 var(--black);
+    image-rendering: pixelated;
+  }
+
+  .stat-box h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .stat-box p {
+    margin: 0.4rem 0 0;
+    font-size: 1.8rem;
+    color: var(--accent);
+  }
+
+  /* RETRO PANELS */
+  .retro-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+
+  .retro-window {
+    border: 3px solid var(--black);
+    background: var(--offwhite);
+    box-shadow: 4px 4px 0 var(--black);
+  }
+
+  .window-title {
+    background: var(--mocha);
+    color: var(--offwhite);
+    padding: 0.5rem;
+    border-bottom: 3px solid var(--black);
+    font-size: 1.1rem;
+  }
+
+  .window-body {
+    padding: 0.8rem;
+  }
+
+  .retro-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+
+  .retro-table th,
+  .retro-table td {
+    border: 2px solid var(--black);
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  .status {
+    padding: 0.2rem 0.5rem;
+    font-weight: bold;
+    border-radius: 2px;
+  }
+
+  .status.green { background: #3a9d23; color: #fff; }
+  .status.yellow { background: #d9b400; color: #000; }
+  .status.red { background: #b22222; color: #fff; }
+
+  .alerts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .alerts li {
+    padding: 0.4rem 0;
+  }
+
+  .alerts .red { color: #b22222; }
+  .alerts .yellow { color: #d9b400; }
+  .alerts .green { color: #3a9d23; }
+</style>
+
+<script>
+  const toggleBtn = document.getElementById('toggleBtn');
+  const sidebar = document.getElementById('sidebar');
+  toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+</script>

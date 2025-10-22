@@ -1,0 +1,54 @@
+<div class="container mt-5">
+  <h1 class="text-center mb-4">📚 Library Book Catalog</h1>
+
+  <div class="text-end mb-3">
+    <a href="/books/new" class="btn btn-success">
+      Add New Book
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle shadow-sm">
+      <thead class="table-dark text-center">
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Genre</th>
+          <th>Publisher</th>
+          <th>Edition</th>
+          <th>Price (₹)</th>
+          <th>Available Copies</th>
+          <th>Total Copies</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% book.forEach(book => { %>
+          <tr>
+            <td><%= book.title %></td>
+            <td><%= book.author || "—" %></td>
+            <td><%= book.genre || "—" %></td>
+            <td><%= book.publisher || "—" %></td>
+            <td><%= book.edition || "—" %></td>
+            <td><%= book.price ? book.price.toFixed(2) : "0.00" %></td>
+            <td class="<%= book.availableCopies > 0 ? 'text-success fw-bold' : 'text-danger fw-bold' %>">
+              <%= book.availableCopies %>
+            </td>
+            <td><%= book.totalCopies %></td>
+            <td><%= book.description ? book.description.substring(0, 50) + (book.description.length > 50 ? '...' : '') : "—" %></td>
+            <td class="text-center">
+              <a href="/books/<%= book._id %>" class="btn btn-sm btn-primary">View</a>
+              <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
+              <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
+                <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this book permanently?')">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

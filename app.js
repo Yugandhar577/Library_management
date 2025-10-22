@@ -10,6 +10,8 @@ const bodyParser = require("body-parser");
 const wrapAsync = require('./utils/wrapAsync.js');
 const error = require('./utils/error.js');
 const User = require("./models/user");
+const Book = require('./models/book');
+const books = require("./models/book");
 
 // ---------------- MongoDB Connection ----------------
 main().then(() => {
@@ -39,6 +41,24 @@ app.engine('ejs', ejsMate);
 
 const validateUser = (req, res, next) => {
   const { error } = userSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new error(msg, 400);
+  }
+  next();
+};
+
+const validateBook = (req, res, next) => {
+  const { error } = bookSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new error(msg, 400);
+  }
+  next();
+};
+
+const validateTransaction = (req, res, next) => {
+  const { error } = transactionSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
@@ -119,6 +139,149 @@ app.get(
     const user = await User.findById(req.params.id);
     if (!user) throw new error("User not found", 404);
     res.render("users/show", { title: "Member Details", user });
+  })
+);
+
+//--------------------- Book Routes -------------------
+
+// List all books
+app.get( "/books",
+  wrapAsync(async (req, res) => {
+    const allBooks = await books.find({});
+    res.render("allbooks", { book: allBooks, title: "All Books" });
+  })
+);
+
+// New Book Form
+app.get("/books/new", (req, res) => {
+  res.render("books/new", { title: "Add New Book" });
+});
+
+// Create New Book
+app.post(
+  "/books",
+  validateBook,
+  wrapAsync(async (req, res) => {
+    const newBook = new Book(req.body.Book);
+    await newBook.save();
+    res.redirect("/books");
+  })
+);
+
+// Edit Book Form
+app.get(
+  "/books/:id/edit",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    res.render("books/edit", { title: "Edit Book", book });
+  })
+);
+
+// Update Book
+app.put(
+  "/books/:id",
+  validateBook,
+  wrapAsync(async (req, res) => {
+    const updatedBook = await Book.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body.Book },
+      { new: true }
+    );
+    if (!updatedBook) throw new error("Book not found", 404);
+    res.redirect(`/books/${updatedBook._id}`);
+  })
+);
+
+// Delete Book
+app.delete(
+  "/books/:id",
+  wrapAsync(async (req, res) => {
+    const deleted = await Book.findByIdAndDelete(req.params.id);
+    if (!deleted) throw new error("Book not found", 404);
+    res.redirect("/books");
+  })
+);
+
+// Show Book Details
+app.get(
+  "/books/:id",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    res.render("books/show", { title: "Book Details", book });
+  })
+);
+
+//------------------- Transaction Routes -------------------
+
+// List all transactions
+app.get(
+  "/transactions",
+  wrapAsync(async (req, res) => {
+    const transactions = await Transaction.find({});
+    res.render("transactions/index", { title: "All Transactions", transactions });
+  })
+);
+
+// New Transaction Form
+app.get("/transactions/new", (req, res) => {
+  res.render("transactions/new", { title: "Add New Transaction" });
+});
+
+// Create New Transaction
+app.post(
+  "/transactions",
+  validateTransaction,
+  wrapAsync(async (req, res) => {
+    const newTransaction = new Transaction(req.body.Transaction);
+    await newTransaction.save();
+    res.redirect("/transactions");
+  })
+);
+
+// Edit Transaction Form
+app.get(
+  "/transactions/:id/edit",
+  wrapAsync(async (req, res) => {
+    const transaction = await Transaction.findById(req.params.id);
+    if (!transaction) throw new error("Transaction not found", 404);
+    res.render("transactions/edit", { title: "Edit Transaction", transaction });
+  })
+);
+
+// Update Transaction
+app.put(
+  "/transactions/:id",
+  validateTransaction,
+  wrapAsync(async (req, res) => {
+    const updatedTransaction = await Transaction.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body.Transaction },
+      { new: true }
+    );
+    if (!updatedTransaction) throw new error("Transaction not found", 404);
+    res.redirect(`/transactions/${updatedTransaction._id}`);
+  })
+);
+
+// Delete Transaction
+app.delete(
+  "/transactions/:id",
+  wrapAsync(async (req, res) => {
+    const deleted = await Transaction.findByIdAndDelete(req.params.id);
+    if (!deleted) throw new error("Transaction not found", 404);
+    res.redirect("/transactions");
+  })
+);
+
+// Show Transaction Details
+app.get(
+  "/transactions/:id",
+  wrapAsync(async (req, res) => {
+    const transaction = await Transaction.findById(req.params.id);
+    if (!transaction) throw new error("Transaction not found", 404);
+    res.render("transactions/show", { title: "Transaction Details", transaction });
   })
 );
 

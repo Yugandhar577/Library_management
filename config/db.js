@@ -12,7 +12,7 @@ async function main(){
 }
 
 async function initdb() {
-    // await books.deleteMany({});
+    await books.deleteMany({});
     await books.insertMany(initdata.data);
     console.log("Database initialized");
 }

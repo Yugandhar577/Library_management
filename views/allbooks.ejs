@@ -1,45 +1,54 @@
-<main>
-<div class="dashboard">
-  <h1 class="retro-title">Books Catalog</h1>
+<div class="container mt-5">
+  <h1 class="text-center mb-4">📚 Library Book Catalog</h1>
 
-  <!-- Search and Filters -->
-  <div class="toolbar">
-    <input type="text" id="searchBar" placeholder="Search books..." />
-    <select id="filterStatus">
-      <option value="all">All</option>
-      <option value="available">Available</option>
-      <option value="issued">Issued</option>
-      <option value="overdue">Overdue</option>
-    </select>
-    <select id="sortBy">
-      <option value="title">Sort by Title</option>
-      <option value="author">Sort by Author</option>
-      <option value="year">Sort by Year</option>
-    </select>
+  <div class="text-end mb-3">
+    <a href="/books/new" class="btn btn-success">
+      Add New Book
+    </a>
   </div>
 
-  <!-- Books Grid -->
-  <div class="books-grid">
-    <% books.forEach(book => { %>
-      <button class="book-card" onclick="window.location.href='/books/<%= book._id %>'">
-        <div class="book-info-left">
-          <h3><%= book.title %></h3>
-          <p><strong>Author:</strong> <%= book.author %></p>
-          <p><strong>Genre:</strong> <%= book.genre %></p>
-          <p><strong>Year:</strong> <%= book.year %></p>
-        </div>
-        <div class="book-info-right">
-          <% if (book.status === 'Available') { %>
-            <span class="status green">Available</span>
-          <% } else if (book.status === 'Issued') { %>
-            <span class="status yellow">Issued</span>
-          <% } else { %>
-            <span class="status red">Overdue</span>
-          <% } %>
-          <p><strong>Copies:</strong> <%= book.copies %></p>
-        </div>
-      </button>
-    <% }) %>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle shadow-sm">
+      <thead class="table-dark text-center">
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Genre</th>
+          <th>Publisher</th>
+          <th>Edition</th>
+          <th>Price (₹)</th>
+          <th>Available Copies</th>
+          <th>Total Copies</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% book.forEach(book => { %>
+          <tr>
+            <td><%= book.title %></td>
+            <td><%= book.author || "—" %></td>
+            <td><%= book.genre || "—" %></td>
+            <td><%= book.publisher || "—" %></td>
+            <td><%= book.edition || "—" %></td>
+            <td><%= book.price ? book.price.toFixed(2) : "0.00" %></td>
+            <td class="<%= book.availableCopies > 0 ? 'text-success fw-bold' : 'text-danger fw-bold' %>">
+              <%= book.availableCopies %>
+            </td>
+            <td><%= book.totalCopies %></td>
+            <td><%= book.description ? book.description.substring(0, 50) + (book.description.length > 50 ? '...' : '') : "—" %></td>
+            <td class="text-center">
+              <a href="/books/<%= book._id %>" class="btn btn-sm btn-primary">View</a>
+              <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
+              <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
+                <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this book permanently?')">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
   </div>
 </div>
-</main>

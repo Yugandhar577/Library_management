@@ -1,4 +1,61 @@
-<!-- home.ejs -->
-<h1>Welcome to the Library Management System</h1>
-<p>This is the home page for the library clerk.</p>
-<p>Use the navigation menu to manage books, members, and transactions.</p>
+<div class="dashboard-container">
+
+  <!-- Main Area -->
+  <main class="main-content">
+    <!-- Retro Dashboard -->
+    <section class="dashboard">
+      <h1 class="retro-title">Library Management Dashboard</h1>
+
+      <!-- Retro Stats -->
+      <div class="stats">
+        <div class="stat-box">
+          <h3>Total Books</h3>
+          <p>1,245</p>
+        </div>
+        <div class="stat-box">
+          <h3>Available</h3>
+          <p>982</p>
+        </div>
+        <div class="stat-box">
+          <h3>Members</h3>
+          <p>320</p>
+        </div>
+        <div class="stat-box">
+          <h3>Overdue</h3>
+          <p>24</p>
+        </div>
+      </div>
+
+      <!-- Tables & Panels -->
+      <div class="retro-panels">
+        <div class="retro-window">
+          <div class="window-title">Recent Transactions</div>
+          <div class="window-body">
+            <table class="retro-table">
+              <thead>
+                <tr><th>Member</th><th>Book</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>John Smith</td><td>The Great Gatsby</td><td><span class="status green">Returned</span></td><td>Oct 14</td></tr>
+                <tr><td>Emily Johnson</td><td>To Kill a Mockingbird</td><td><span class="status yellow">Issued</span></td><td>Oct 13</td></tr>
+                <tr><td>Michael Brown</td><td>1984</td><td><span class="status red">Overdue</span></td><td>Oct 02</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="retro-window">
+          <div class="window-title">System Alerts</div>
+          <div class="window-body">
+            <ul class="alerts">
+              <li class="red">24 Books Overdue</li>
+              <li class="yellow">3 Pending Reservations</li>
+              <li class="green">Backup Successful</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+

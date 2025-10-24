@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const mongoose = require('mongoose');
 const expressLayouts = require("express-ejs-layouts");
 const path = require("path");
 const ejsMate = require('ejs-mate');
@@ -31,22 +30,9 @@ app.set("views", path.join(__dirname, "views"));
 // Express layouts setup
 app.use(expressLayouts);
 app.set("layout", "layouts/boilerplate");
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.engine('ejs', ejsMate);
 
-const validateUser = (req, res, next) => {
-  const { error } = userSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
-    throw new error(msg, 400);
-  }
-  next();
-};
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
 
 const validateBook = (req, res, next) => {
   const { error } = bookSchema.validate(req.body);
@@ -71,6 +57,38 @@ app.get("/", (req, res) => {
   res.render("home", { title: "Library Management System" });
 });
 
+app.get("/allbooks", async (req, res) => {
+  // Example data — later replace with DB fetch
+  const books = [
+    {
+      _id: 1,
+      title: "1984",
+      author: "George Orwell",
+      genre: "Dystopian",
+      year: 1949,
+      status: "Available",
+      copies: 5,
+    },
+    {
+      _id: 2,
+      title: "To Kill a Mockingbird",
+      author: "Harper Lee",
+      genre: "Fiction",
+      year: 1960,
+      status: "Issued",
+      copies: 2,
+    },
+    {
+      _id: 3,
+      title: "The Great Gatsby",
+      author: "F. Scott Fitzgerald",
+      genre: "Classic",
+      year: 1925,
+      status: "Overdue",
+      copies: 1,
+    },
+  ];
+  res.render("allbooks", { layout: "layouts/boilerplate", title: "Books", books });
 // ------------------- User Routes -------------------
 // List all users (members)
 app.get(
@@ -291,14 +309,84 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error", { statusCode, message });
 });
 
-// ------------------- Catch-All 404 -------------------
-app.use((req, res, next) => {
-  next(new error("Page Not Found", 404));
+app.get("/allMembers", async (req, res) => {
+  // Example data — later replace with database results
+  const members = [
+    {
+      _id: 1,
+      name: "Alice Johnson",
+      memberId: "M001",
+      email: "alice@mail.com",
+      membershipType: "Regular",
+      status: "Active",
+      borrowedBooks: 3,
+      overdueCount: 0,
+    },
+    {
+      _id: 2,
+      name: "Bob Williams",
+      memberId: "M002",
+      email: "bob@mail.com",
+      membershipType: "Premium",
+      status: "Overdue",
+      borrowedBooks: 5,
+      overdueCount: 2,
+    },
+    {
+      _id: 3,
+      name: "Carla Rivera",
+      memberId: "M003",
+      email: "carla@mail.com",
+      membershipType: "Regular",
+      status: "Active",
+      borrowedBooks: 1,
+      overdueCount: 0,
+    },
+  ];
+  res.render("allMembers", {
+    layout: "layouts/boilerplate",
+    title: "All Members",
+    members,
+  });
 });
 
-// ------------------- Start Server -------------------
-app.listen(8080, () => {
-  console.log(`Server running at http://localhost:8080`);
-});
+app.get("/allTransactions", (req, res) => {
+  const transactions = [
+    {
+      id: "TXN1001",
+      memberName: "Alice Johnson",
+      bookTitle: "The Art of Computer Programming",
+      issueDate: "2025-09-20",
+      dueDate: "2025-10-05",
+      status: "Returned",
+    },
+    {
+      id: "TXN1002",
+      memberName: "Ravi Sharma",
+      bookTitle: "Introduction to Algorithms",
+      issueDate: "2025-10-01",
+      dueDate: "2025-10-15",
+      status: "Issued",
+    },
+    {
+      id: "TXN1003",
+      memberName: "Mina Lee",
+      bookTitle: "Artificial Intelligence: A Modern Approach",
+      issueDate: "2025-09-10",
+      dueDate: "2025-09-25",
+      status: "Overdue",
+    },
+  ];
 
-module.exports = app;
+  res.render("allTransactions", {
+    layout: "layouts/boilerplate",
+    title: "All Transactions",
+    transactions,
+  });});
+
+
+// Start server
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});

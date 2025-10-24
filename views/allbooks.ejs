@@ -1,0 +1,45 @@
+<main>
+<div class="dashboard">
+  <h1 class="retro-title">Books Catalog</h1>
+
+  <!-- Search and Filters -->
+  <div class="toolbar">
+    <input type="text" id="searchBar" placeholder="Search books..." />
+    <select id="filterStatus">
+      <option value="all">All</option>
+      <option value="available">Available</option>
+      <option value="issued">Issued</option>
+      <option value="overdue">Overdue</option>
+    </select>
+    <select id="sortBy">
+      <option value="title">Sort by Title</option>
+      <option value="author">Sort by Author</option>
+      <option value="year">Sort by Year</option>
+    </select>
+  </div>
+
+  <!-- Books Grid -->
+  <div class="books-grid">
+    <% books.forEach(book => { %>
+      <button class="book-card" onclick="window.location.href='/books/<%= book._id %>'">
+        <div class="book-info-left">
+          <h3><%= book.title %></h3>
+          <p><strong>Author:</strong> <%= book.author %></p>
+          <p><strong>Genre:</strong> <%= book.genre %></p>
+          <p><strong>Year:</strong> <%= book.year %></p>
+        </div>
+        <div class="book-info-right">
+          <% if (book.status === 'Available') { %>
+            <span class="status green">Available</span>
+          <% } else if (book.status === 'Issued') { %>
+            <span class="status yellow">Issued</span>
+          <% } else { %>
+            <span class="status red">Overdue</span>
+          <% } %>
+          <p><strong>Copies:</strong> <%= book.copies %></p>
+        </div>
+      </button>
+    <% }) %>
+  </div>
+</div>
+</main>

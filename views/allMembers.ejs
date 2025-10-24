@@ -1,0 +1,44 @@
+<main>
+<div class="dashboard">
+  <h1 class="retro-title">All Members</h1>
+
+  <!-- Search & Filters -->
+  <div class="toolbar">
+    <input type="text" id="memberSearch" placeholder="Search members..." />
+    <select id="filterMembership">
+      <option value="all">All Types</option>
+      <option value="regular">Regular</option>
+      <option value="premium">Premium</option>
+    </select>
+    <select id="filterStatus">
+      <option value="all">All Status</option>
+      <option value="active">Active</option>
+      <option value="overdue">Overdue</option>
+    </select>
+  </div>
+
+  <!-- Members Grid -->
+  <div class="members-grid">
+    <% members.forEach(member => { %>
+      <button class="member-card" onclick="window.location.href='/members/<%= member._id %>'">
+        <div class="member-info-left">
+          <h3><%= member.name %></h3>
+          <p><strong>ID:</strong> <%= member.memberId %></p>
+          <p><strong>Email:</strong> <%= member.email %></p>
+          <p><strong>Type:</strong> <%= member.membershipType %></p>
+        </div>
+        <div class="member-info-right">
+          <% if (member.status === 'Active') { %>
+            <span class="status green">Active</span>
+          <% } else { %>
+            <span class="status red">Overdue</span>
+          <% } %>
+          <p><strong>Borrowed:</strong> <%= member.borrowedBooks %></p>
+          <p><strong>Overdue:</strong> <%= member.overdueCount %></p>
+        </div>
+      </button>
+    <% }) %>
+  </div>
+</div>
+</main>
+

@@ -3,8 +3,8 @@
     <h1 class="retro-title text-center mb-4">📚 Library Book Catalog</h1>
 
     <!-- Add Book Button -->
-    <div class="text-end mb-3">
-      <a href="/books/addbook" class="retro-btn" style="margin-bottom: 1rem;">
+    <div class="text-end mb-3" style="margin-bottom: 1rem;">
+      <a href="/allbooks/addbook" class="retro-btn">
         Add New Book
       </a>
     </div>
@@ -28,46 +28,36 @@
     </div>
 
     <!-- Books Grid -->
-    <div class="books-grid row row-cols-1 row-cols-md-3 g-4">
+    <div class="books-grid">
       <% if (allBooks.length === 0) { %>
         <div class="text-center">
           <p class="text-muted fs-5">No books available in the catalog.</p>
         </div>
       <% } else { %>
         <% allBooks.forEach(book => { %>
-          <div class="col">
-            <div class="book-card card shadow-sm h-100 d-flex flex-column">
-              <div class="card-body">
-                <h5 class="card-title fw-bold"><%= book.title %></h5>
-                <p class="card-text text-muted mb-1"><strong>Author:</strong> <%= book.author || "—" %></p>
-                <p class="card-text mb-1"><strong>Genre:</strong> <%= book.genre || "—" %></p>
-                <p class="card-text mb-1"><strong>Publisher:</strong> <%= book.publisher || "—" %></p>
-                <p class="card-text mb-1"><strong>Edition:</strong> <%= book.edition || "—" %></p>
-                <p class="card-text mb-1"><strong>Price:</strong> ₹<%= book.price ? book.price.toFixed(2) : "0.00" %></p>
-                <p class="card-text mb-1">
-                  <strong>Available:</strong> 
-                  <span class="<%= book.availableCopies > 0 ? 'text-success' : 'text-danger' %> fw-bold">
-                    <%= book.availableCopies %>
-                  </span>
-                  / <%= book.totalCopies %>
-                </p>
-                <p class="card-text">
-                  <%= book.description ? book.description.substring(0, 100) + (book.description.length > 100 ? '...' : '') : "—" %>
-                </p>
-              </div>
+          <div class="book-card">
+            <div class="book-info-left">
+              <h3><%= book.title %></h3>
+              <p><strong>Author:</strong> <%= book.author || "—" %></p>
+              <p><strong>Genre:</strong> <%= book.genre || "—" %></p>
+              <p><strong>Publisher:</strong> <%= book.publisher || "—" %></p>
+              <p><strong>Edition:</strong> <%= book.edition || "—" %></p>
+              <p><strong>Price:</strong> ₹<%= book.price ? book.price.toFixed(2) : "0.00" %></p>
+              <p>
+                <strong>Available:</strong> 
+                <span class="<%= book.availableCopies > 0 ? 'status green' : 'status red' %>">
+                  <%= book.availableCopies %>
+                </span> / <%= book.totalCopies %>
+              </p>
+              <p><%= book.description ? book.description.substring(0, 100) + (book.description.length > 100 ? '...' : '') : "—" %></p>
+            </div>
 
-              <!-- Hidden status span for filtering -->
-              <span class="status" style="display:none;">
-                <%= book.availableCopies > 0 ? "available" : "unavailable" %>
-              </span>
-
-              <div class="card-footer bg-white d-flex justify-content-between mt-auto">
-                <a href="/books/<%= book._id %>" class="btn btn-sm btn-primary">View</a>
-                <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
-                <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
-                  <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this book permanently?')">Delete</button>
-                </form>
-              </div>
+            <div class="book-info-right">
+              <a href="/books/<%= book._id %>" class="retro-btn" style="margin-bottom:0.5rem;">View</a>
+              <a href="/books/<%= book._id %>/edit" class="retro-btn" style="margin-bottom:0.5rem;">Edit</a>
+              <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:block;">
+                <button class="retro-btn" onclick="return confirm('Delete this book permanently?')">Delete</button>
+              </form>
             </div>
           </div>
         <% }) %>

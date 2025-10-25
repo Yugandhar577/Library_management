@@ -159,7 +159,7 @@ app.get(
 );
 
 // Add New Book Form
-app.get("/books/addbook", (req, res) => {
+app.get("/allbooks/addbook", (req, res) => {
   res.render("books/addbook", { title: "Add New Book" });
 });
 
@@ -180,7 +180,7 @@ app.get(
   wrapAsync(async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) throw new error("Book not found", 404);
-    res.render("books/edit", { title: "Edit Book", book });
+    res.render("books/editbook", { title: "Edit Book", book });
   })
 );
 
@@ -205,7 +205,7 @@ app.delete(
   wrapAsync(async (req, res) => {
     const deleted = await Book.findByIdAndDelete(req.params.id);
     if (!deleted) throw new error("Book not found", 404);
-    res.redirect("/books");
+    res.redirect("/allbooks");
   })
 );
 

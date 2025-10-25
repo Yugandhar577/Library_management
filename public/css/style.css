@@ -541,31 +541,9 @@ main {
   box-shadow: 2px 2px 0 var(--black);
 }
 
-/* .btn-cancel {
-  background: var(--mocha);
-  color: var(--offwhite);
-  border: 3px solid var(--black);
-  box-shadow: 4px 4px 0 var(--black);
-  padding: 0.5rem 1.2rem;
-  font-family: 'VT323', monospace;
-  font-size: 1.2rem;
-  text-transform: uppercase;
-  text-decoration: none;
-  margin-left: 1rem;
-  transition: all 0.2s ease;
-}
+/*  ===== BOOK FORM STYLES ===== */
 
-.btn-cancel:hover {
-  background: var(--accent);
-  color: var(--black);
-  transform: translateY(-3px);
-  box-shadow: 6px 6px 0 var(--black);
-} */
-
-
-/*  ===== ADD BOOK FORM STYLES ===== */
-
-.add-book-form {
+.book-form {
   max-width: 700px;
   margin: 2rem auto;
   background: var(--offwhite);
@@ -574,7 +552,7 @@ main {
   padding: 1.5rem;
 }
 
-.add-book-form h1 {
+.book-form h1 {
   text-align: center;
   font-size: 1.8rem;
   color: var(--black);
@@ -596,7 +574,7 @@ main {
 }
 
 .retro-input,
-.add-book-form textarea {
+.book-form textarea {
   background: var(--offwhite);
   border: 2px solid var(--black);
   font-family: 'VT323', monospace;
@@ -607,7 +585,7 @@ main {
 }
 
 .retro-input:focus,
-.add-book-form textarea:focus {
+.book-form textarea:focus {
   border-color: var(--accent);
 }
 

@@ -1,0 +1,31 @@
+<main>
+<div class="dashboard">
+  <h2 class="retro-title">Book Details</h2>
+
+  <div class="retro-window">
+    <div class="window-title">Book Info</div>
+    <div class="window-body">
+      <p><strong>Title:</strong> <%= book.title %></p>
+      <p><strong>Author:</strong> <%= book.author || "—" %></p>
+      <p><strong>Genre:</strong> <%= book.genre || "—" %></p>
+      <p><strong>Publisher:</strong> <%= book.publisher || "—" %></p>
+      <p><strong>Edition:</strong> <%= book.edition || "—" %></p>
+      <p><strong>Price:</strong> ₹<%= book.price ? book.price.toFixed(2) : "0.00" %></p>
+      <p><strong>Available Copies:</strong> 
+        <span class="<%= book.availableCopies > 0 ? 'status green' : 'status red' %>">
+          <%= book.availableCopies %>
+        </span> / <%= book.totalCopies %>
+      </p>
+      <p><strong>Description:</strong> <%= book.description || "—" %></p>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <a href="/books/<%= book._id %>/edit" class="retro-btn">Edit Book</a>
+    <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
+      <button class="retro-btn" onclick="return confirm('Delete this book permanently?')">Delete Book</button>
+    </form>
+    <a href="/allbooks" class="retro-btn">Back to List</a>
+  </div>
+</div>
+</main>

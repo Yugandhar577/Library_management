@@ -79,6 +79,23 @@ const applyFilters = () => {
   }
 };
 
+// === Dashboard Stats Fetch ===
+const fetchStats = async () => {
+  try {
+    const response = await fetch("/api/stats");
+    const data = await response.json();
+
+    document.getElementById("totalBooks").innerText = data.totalBooks || 0;
+    document.getElementById("availableBooks").innerText = data.availableBooks || 0;
+    document.getElementById("totalMembers").innerText = data.totalMembers || 0;
+    document.getElementById("overdueMembers").innerText = data.overdueMembers || 0;
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+  }
+};
+
+fetchStats();
+
 // === Event Listeners ===
 if (searchBar) searchBar.addEventListener("input", applyFilters);
 if (filterStatus) filterStatus.addEventListener("change", applyFilters);

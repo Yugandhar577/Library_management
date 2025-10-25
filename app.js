@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const mongoose = require("mongoose");
 const expressLayouts = require("express-ejs-layouts");
 const path = require("path");
 const ejsMate = require('ejs-mate');
@@ -8,9 +9,10 @@ const bodyParser = require("body-parser");
 // const MongoStore = require("connect-mongo");
 const wrapAsync = require('./utils/wrapAsync.js');
 const error = require('./utils/error.js');
-const User = require("./models/user");
-const Book = require('./models/book');
-const books = require("./models/book");
+const User = require("./models/user.js");
+const Book = require("./models/book.js");
+const issue = require("./models/issue.js");
+const user = require("./models/user.js");
 
 // ---------------- MongoDB Connection ----------------
 main().then(() => {
@@ -20,7 +22,7 @@ main().then(() => {
 });
 
 async function main() {
-    await mongoose.connect('mongodb://localhost:27017/EcoFinds');
+    await mongoose.connect('mongodb://localhost:27017/LibraryDB');
 }
 
 // EJS setup
@@ -52,43 +54,29 @@ const validateTransaction = (req, res, next) => {
   next();
 };
 
+const validateUser = (req, res, next) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new error(msg, 400);
+  }
+  next();
+};
+
 // Routes
 app.get("/", (req, res) => {
   res.render("home", { title: "Library Management System" });
 });
 
-app.get("/allbooks", async (req, res) => {
-  // Example data — later replace with DB fetch
-  const books = [
-    {
-      _id: 1,
-      title: "1984",
-      author: "George Orwell",
-      genre: "Dystopian",
-      year: 1949,
-      status: "Available",
-      copies: 5,
-    },
-    {
-      _id: 2,
-      title: "To Kill a Mockingbird",
-      author: "Harper Lee",
-      genre: "Fiction",
-      year: 1960,
-      status: "Issued",
-      copies: 2,
-    },
-    {
-      _id: 3,
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      genre: "Classic",
-      year: 1925,
-      status: "Overdue",
-      copies: 1,
-    },
-  ];
-  res.render("allbooks", { layout: "layouts/boilerplate", title: "Books", books });
+app.get(
+  "/allbooks",
+  wrapAsync(async (req, res) => {
+    const allBooks = await Book.find({});
+    res.render("allbooks", { allBooks, title: "All Books" });
+  })
+);
+
+
 // ------------------- User Routes -------------------
 // List all users (members)
 app.get(
@@ -309,46 +297,12 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error", { statusCode, message });
 });
 
-app.get("/allMembers", async (req, res) => {
-  // Example data — later replace with database results
-  const members = [
-    {
-      _id: 1,
-      name: "Alice Johnson",
-      memberId: "M001",
-      email: "alice@mail.com",
-      membershipType: "Regular",
-      status: "Active",
-      borrowedBooks: 3,
-      overdueCount: 0,
-    },
-    {
-      _id: 2,
-      name: "Bob Williams",
-      memberId: "M002",
-      email: "bob@mail.com",
-      membershipType: "Premium",
-      status: "Overdue",
-      borrowedBooks: 5,
-      overdueCount: 2,
-    },
-    {
-      _id: 3,
-      name: "Carla Rivera",
-      memberId: "M003",
-      email: "carla@mail.com",
-      membershipType: "Regular",
-      status: "Active",
-      borrowedBooks: 1,
-      overdueCount: 0,
-    },
-  ];
-  res.render("allMembers", {
-    layout: "layouts/boilerplate",
-    title: "All Members",
-    members,
-  });
-});
+// ------------------- Additional Routes -------------------
+app.get("/allMembers",wrapAsync(async (req, res) => {
+    const allMembers = await user.find({});
+    res.render("allMembers", {allMembers, title: "All Members" });
+  })
+);
 
 app.get("/allTransactions", (req, res) => {
   const transactions = [
@@ -382,8 +336,23 @@ app.get("/allTransactions", (req, res) => {
     layout: "layouts/boilerplate",
     title: "All Transactions",
     transactions,
-  });});
+  });
+});
 
+// ------------------- Dashboard Setup -------------------
+app.get("/api/stats", wrapAsync(async (req, res) => {
+  const totalBooks = await Book.countDocuments({});
+  const availableBooks = await Book.countDocuments({ availableCopies: { $gt: 0 } });
+  const totalMembers = await user.countDocuments({});
+  const overdueMembers = await user.countDocuments({ overdueCount: { $gt: 0 } });
+
+  res.json({
+    totalBooks,
+    availableBooks,
+    totalMembers,
+    overdueMembers
+  });
+}));
 
 // Start server
 const PORT = 3000;

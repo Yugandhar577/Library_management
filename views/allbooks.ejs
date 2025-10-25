@@ -1,54 +1,77 @@
-<div class="container mt-5">
-  <h1 class="text-center mb-4">📚 Library Book Catalog</h1>
+<main>
+  <div class="dashboard">
+    <h1 class="retro-title text-center mb-4">📚 Library Book Catalog</h1>
 
-  <div class="text-end mb-3">
-    <a href="/books/new" class="btn btn-success">
-      Add New Book
-    </a>
-  </div>
+    <!-- Add Book Button -->
+    <div class="text-end mb-3">
+      <a href="/books/new" class="btn btn-success">
+        Add New Book
+      </a>
+    </div>
 
-  <div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle shadow-sm">
-      <thead class="table-dark text-center">
-        <tr>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Genre</th>
-          <th>Publisher</th>
-          <th>Edition</th>
-          <th>Price (₹)</th>
-          <th>Available Copies</th>
-          <th>Total Copies</th>
-          <th>Description</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% book.forEach(book => { %>
-          <tr>
-            <td><%= book.title %></td>
-            <td><%= book.author || "—" %></td>
-            <td><%= book.genre || "—" %></td>
-            <td><%= book.publisher || "—" %></td>
-            <td><%= book.edition || "—" %></td>
-            <td><%= book.price ? book.price.toFixed(2) : "0.00" %></td>
-            <td class="<%= book.availableCopies > 0 ? 'text-success fw-bold' : 'text-danger fw-bold' %>">
-              <%= book.availableCopies %>
-            </td>
-            <td><%= book.totalCopies %></td>
-            <td><%= book.description ? book.description.substring(0, 50) + (book.description.length > 50 ? '...' : '') : "—" %></td>
-            <td class="text-center">
-              <a href="/books/<%= book._id %>" class="btn btn-sm btn-primary">View</a>
-              <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
-              <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
-                <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this book permanently?')">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
+    <div class="toolbar mb-4">
+      <input type="text" id="searchBar" placeholder="Search books..." />
+
+      <!-- Status filter -->
+      <select id="filterStatus">
+        <option value="all">All Availability</option>
+        <option value="available">Available</option>
+        <option value="unavailable">Unavailable</option>
+      </select>
+
+      <!-- Optional: sort dropdown -->
+      <select id="sortBy">
+        <option value="">Sort by</option>
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+      </select>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="books-grid row row-cols-1 row-cols-md-3 g-4">
+      <% if (allBooks.length === 0) { %>
+        <div class="text-center">
+          <p class="text-muted fs-5">No books available in the catalog.</p>
+        </div>
+      <% } else { %>
+        <% allBooks.forEach(book => { %>
+          <div class="col">
+            <div class="book-card card shadow-sm h-100 d-flex flex-column">
+              <div class="card-body">
+                <h5 class="card-title fw-bold"><%= book.title %></h5>
+                <p class="card-text text-muted mb-1"><strong>Author:</strong> <%= book.author || "—" %></p>
+                <p class="card-text mb-1"><strong>Genre:</strong> <%= book.genre || "—" %></p>
+                <p class="card-text mb-1"><strong>Publisher:</strong> <%= book.publisher || "—" %></p>
+                <p class="card-text mb-1"><strong>Edition:</strong> <%= book.edition || "—" %></p>
+                <p class="card-text mb-1"><strong>Price:</strong> ₹<%= book.price ? book.price.toFixed(2) : "0.00" %></p>
+                <p class="card-text mb-1">
+                  <strong>Available:</strong> 
+                  <span class="<%= book.availableCopies > 0 ? 'text-success' : 'text-danger' %> fw-bold">
+                    <%= book.availableCopies %>
+                  </span>
+                  / <%= book.totalCopies %>
+                </p>
+                <p class="card-text">
+                  <%= book.description ? book.description.substring(0, 100) + (book.description.length > 100 ? '...' : '') : "—" %>
+                </p>
+              </div>
+
+              <!-- Hidden status span for filtering -->
+              <span class="status" style="display:none;">
+                <%= book.availableCopies > 0 ? "available" : "unavailable" %>
+              </span>
+
+              <div class="card-footer bg-white d-flex justify-content-between mt-auto">
+                <a href="/books/<%= book._id %>" class="btn btn-sm btn-primary">View</a>
+                <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
+                <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this book permanently?')">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
         <% }) %>
-      </tbody>
-    </table>
+      <% } %>
+    </div>
   </div>
-</div>
+</main>

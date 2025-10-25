@@ -11,5 +11,5 @@ const issueSchema = new Schema({
   status: { type: String, enum: ["issued", "returned"], default: "issued" }
 });
 
-const issues = mongoose.model("Issue", issueSchema);
-module.exports = issues;
+const issue = mongoose.model("Issue", issueSchema);
+module.exports = issue;

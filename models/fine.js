@@ -9,5 +9,5 @@ const fineSchema = new Schema({
   generatedAt: { type: Date, default: Date.now }
 });
 
-const fines = mongoose.model("Fine", fineSchema);
-module.exports = fines;
+const fine = mongoose.model("Fine", fineSchema);
+module.exports = fine;

@@ -1,11 +1,10 @@
 // === Sidebar toggle ===
-const toggleBtn = document.getElementById("toggleBtn");
-const sidebar = document.getElementById("sidebar");
-if (toggleBtn && sidebar) {
-  toggleBtn.addEventListener("click", () =>
-    sidebar.classList.toggle("collapsed")
-  );
-}
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggleBtn');
+
+toggleBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+});
 
 // === Search, Filter, Sort Logic (Reusable for Books & Members) ===
 const searchBar =

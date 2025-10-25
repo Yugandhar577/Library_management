@@ -1,7 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+/* --- COLOR VARIABLES (Consolidated) --- */
+:root {
+  --mocha: #3b2f2f; /* Dark background for sidebar/titles */
+  --offwhite: #f7f3e9; /* Main content background */
+  --black: #1b1b1b; /* Borders, text, shadows */
+  --accent: #d97a00; /* Orange/Gold accent */
+}
 
-  /* --- LAYOUT FIX --- */
+/* --- BASE STYLES & LAYOUT FIX --- */
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: 'VT323', monospace;
@@ -9,266 +20,264 @@ body {
   color: var(--black);
 }
 
-/* Make sidebar fixed */
-.sidebar {
-  position: fixed;
-  top: 45px; /* height of topbar */
-  left: 0;
-  width: 230px;
-  height: calc(100vh - 45px);
-  background: var(--mocha);
-  color: var(--offwhite);
+.dashboard-container {
   display: flex;
-  flex-direction: column;
-  transition: width 0.3s ease;
-  box-shadow: 4px 0 0 var(--black);
-  z-index: 10;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* Make topbar fixed */
-.topbar {
+/* --- SIDEBAR --- */
+.sidebar {
+  background-color: var(--mocha);
+  width: 250px; /* Default (Expanded) width */
+  height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  height: 45px;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  z-index: 1000;
+}
+
+.logo {
+  text-align: center;
   background: var(--black);
-  color: var(--offwhite);
+  padding: 1rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--offwhite);
+  color: var(--offwhite); /* Ensure logo text is visible */
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.5rem;
+  flex-grow: 1; /* Allow menu to take up available space */
+}
+
+/* Sidebar links */
+.sidebar .menu a {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
-  z-index: 20;
+  gap: 1rem;
+  color: var(--offwhite);
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  margin: 0.2rem 0;
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
 }
 
-/* Main content should start beside sidebar, below topbar */
-main {
-  margin-left: 130px; 
-  margin-top: 10px;   
+.sidebar .menu a i {
+  font-size: 1.2rem;
+  width: 20px; /* Keep icons aligned */
+  text-align: center;
+}
+
+.sidebar .menu a .link-text {
+  white-space: nowrap;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar .menu a:hover,
+.sidebar .menu a.active {
+  background: #2b2222;
+  border-left: 4px solid var(--accent);
+}
+
+/* Collapsed state */
+.sidebar.collapsed {
+  width: 70px; /* Collapsed width */
+}
+
+.sidebar.collapsed .menu a .link-text {
+  opacity: 0;
+  visibility: hidden;
+  width: 0; /* Ensures the hidden text doesn't affect layout */
+}
+
+.sidebar.collapsed .logo h2 {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* Toggle button */
+#toggleBtn {
+  background: var(--mocha);
+  color: var(--offwhite);
+  border: 3px solid var(--black);
+  box-shadow: 4px 4px 0 var(--black);
+  cursor: pointer;
+  font-family: 'VT323', monospace;
+  padding: 0.5rem 0.8rem;
+  width: 90%;
+  margin: 1rem auto;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+#toggleBtn:hover {
+  background: var(--accent);
+  color: var(--black);
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 var(--black);
+}
+
+#toggleBtn:active {
+  transform: translateY(0);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+/* --- MAIN CONTENT & LAYOUT --- */
+
+/* Main content should start beside sidebar */
+main { 
   padding: 1rem;
-  min-height: calc(100vh - 45px);
+  margin-top: -1rem;
   background: var(--offwhite);
   transition: margin-left 0.3s ease;
+  width: 95%; 
 }
 
-/* Collapsed state for sidebar toggle */
-.sidebar.collapsed + main {
-  margin-left: px;
-}
-
-  :root {
-    --mocha: #3b2f2f;
-    --offwhite: #f7f3e9;
-    --black: #1b1b1b;
-    --accent: #d97a00;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    font-family: 'VT323', monospace;
-    background-color: var(--offwhite);
-    color: var(--black);
-  }
-
-  .dashboard-container {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* SIDEBAR */
-  .sidebar {
-    width: 230px;
-    background: var(--mocha);
-    color: var(--offwhite);
-    display: flex;
-    flex-direction: column;
-    transition: width 0.3s ease;
-    box-shadow: 4px 0 0 var(--black);
-  }
-
-  .sidebar.collapsed {
-    width: 70px;
-  }
-
-  .logo {
-    text-align: center;
-    background: var(--black);
-    padding: 1rem;
-    font-size: 1.5rem;
-    border-bottom: 2px solid var(--offwhite);
-  }
-
-  .menu {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem 0.5rem;
-  }
-
-  .menu a {
-    color: var(--offwhite);
-    text-decoration: none;
-    padding: 0.6rem 1rem;
-    margin: 0.2rem 0;
-    border-left: 4px solid transparent;
-    transition: all 0.2s ease;
-  }
-
-  .menu a:hover,
-  .menu a.active {
-    background: #2b2222;
-    border-left: 4px solid var(--accent);
-  }
-
-  /* MAIN CONTENT */
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* TOP BAR */
-  .topbar {
-    background: var(--black);
-    color: var(--offwhite);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    height: 45px;
-  }
-
-  .topbar input {
-    border: 1px solid var(--offwhite);
-    background: var(--offwhite);
-    color: var(--black);
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    font-family: 'VT323', monospace;
-  }
-
-  #toggleBtn {
-    background: none;
-    color: var(--offwhite);
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-
-  /* DASHBOARD CONTENT */
-  .dashboard {
-    padding: 1.5rem;
-  }
-
-  .retro-title {
-    font-size: 1.6rem;
-    border-bottom: 2px solid var(--black);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  /* STATS */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .stat-box {
-    background: var(--mocha);
-    color: var(--offwhite);
-    border: 3px solid var(--black);
-    padding: 1rem;
-    text-align: center;
-    box-shadow: 4px 4px 0 var(--black);
-    image-rendering: pixelated;
-  }
-
-  .stat-box h3 {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  .stat-box p {
-    margin: 0.4rem 0 0;
-    font-size: 1.8rem;
-    color: var(--accent);
-  }
-
-  /* RETRO PANELS */
-  .retro-panels {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
-  }
-
-  .retro-window {
-    border: 3px solid var(--black);
-    background: var(--offwhite);
-    box-shadow: 4px 4px 0 var(--black);
-  }
-
-  .window-title {
-    background: var(--mocha);
-    color: var(--offwhite);
-    padding: 0.5rem;
-    border-bottom: 3px solid var(--black);
-    font-size: 1.1rem;
-  }
-
-  .window-body {
-    padding: 0.8rem;
-  }
-
-  .retro-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 1rem;
-  }
-
-  .retro-table th,
-  .retro-table td {
-    border: 2px solid var(--black);
-    padding: 0.5rem;
-    text-align: left;
-  }
-
-  .status {
-    padding: 0.2rem 0.5rem;
-    font-weight: bold;
-    border-radius: 2px;
-  }
-
-  .status.green { background: #3a9d23; color: #fff; }
-  .status.yellow { background: #d9b400; color: #000; }
-  .status.red { background: #b22222; color: #fff; }
-
-  .alerts {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .alerts li {
-    padding: 0.4rem 0;
-  }
-
-  .alerts .red { color: #b22222; }
-  .alerts .yellow { color: #d9b400; }
-  .alerts .green { color: #3a9d23; }
-
-.sidebar.collapsed {
-  width: 70px;
-}
-
+/* Adjust main content when sidebar is collapsed (70px) */
 .sidebar.collapsed ~ main {
-  margin-left: 70px;
+  margin-left: 70px; 
 }
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* --- FOOTER --- */
+footer {
+  background: var(--mocha);
+  color: var(--offwhite);
+  text-align: center;
+  /* Fixed height + padding is about 40px */
+  padding: 0.8rem 0; 
+  position: fixed;
+  bottom: 0;
+  /* Use a large calc to ensure it spans the whole width not covered by the fixed sidebar */
+  width: calc(100% - 250px); 
+  border-top: 2px solid var(--black);
+  font-size: 1rem;
+  left: 250px;
+  transition: left 0.3s ease, width 0.3s ease;
+  z-index: 999; /* Below sidebar */
+}
+
+.sidebar.collapsed ~ footer {
+  left: 70px;
+  width: calc(100% - 70px);
+}
+
+/* DASHBOARD CONTENT */
+.dashboard {
+  padding: 1.5rem;
+}
+
+.retro-title {
+  font-size: 1.6rem;
+  border-bottom: 2px solid var(--black);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* STATS */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-box {
+  background: var(--mocha);
+  color: var(--offwhite);
+  border: 3px solid var(--black);
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 4px 4px 0 var(--black);
+  image-rendering: pixelated;
+}
+
+.stat-box h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.stat-box p {
+  margin: 0.4rem 0 0;
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+
+/* RETRO PANELS */
+.retro-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.retro-window {
+  border: 3px solid var(--black);
+  background: var(--offwhite);
+  box-shadow: 4px 4px 0 var(--black);
+}
+
+.window-title {
+  background: var(--mocha);
+  color: var(--offwhite);
+  padding: 0.5rem;
+  border-bottom: 3px solid var(--black);
+  font-size: 1.1rem;
+}
+
+.window-body {
+  padding: 0.8rem;
+}
+
+.retro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.retro-table th,
+.retro-table td {
+  border: 2px solid var(--black);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+/* --- STATUS COLORS (Used in table/alerts) --- */
+.status {
+  padding: 0.2rem 0.5rem;
+  font-weight: bold;
+  border-radius: 2px;
+}
+
+.status.green { background: #3a9d23; color: #fff; }
+.status.yellow { background: #d9b400; color: #000; }
+.status.red { background: #b22222; color: #fff; }
+
+.alerts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alerts li {
+  padding: 0.4rem 0;
+}
+
+.alerts .red { color: #b22222; }
+.alerts .yellow { color: #d9b400; }
+.alerts .green { color: #3a9d23; }
 
 /* ===== Books Page ===== */
 .toolbar {
@@ -313,13 +322,20 @@ main {
   transition: all 0.2s ease;
   text-align: left;
   font-family: 'VT323', monospace;
-
 }
 
 .book-card:hover {
   transform: translateY(-3px);
   box-shadow: 6px 6px 0 var(--black);
   background: #2f2525;
+}
+
+/* --- FIX: Added styles for left info block --- */
+.book-info-left {
+  flex: 1; /* Allows the info to take up available space */
+  padding-right: 1rem; /* Adds spacing before the buttons */
+  /* Ensures long descriptions will wrap */
+  word-break: break-word; 
 }
 
 .book-info-left h3 {
@@ -332,20 +348,66 @@ main {
   margin: 0.2rem 0;
 }
 
+/* --- FIX: Replaced styles for right button block --- */
 .book-info-right {
-  text-align: right;
+  display: flex;
+  flex-direction: column; /* Stacks the buttons vertically */
+  gap: 0.5rem; /* Adds space between the buttons */
+  flex-shrink: 0; /* Prevents buttons from shrinking */
 }
 
-.status {
-  display: inline-block;
-  margin-bottom: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  font-weight: bold;
-  border-radius: 2px;
+/* --- FIX: Removed incorrect .book-card .status block --- */
+
+/* --- FIX: Added styles for smaller card buttons --- */
+.book-card .retro-btn {
+  /* Override default retro-btn styles for a smaller version */
+  font-size: 1rem;
+  padding: 0.4rem 0.8rem;
+  width: 100%; /* Makes all buttons a consistent width */
+  text-align: center;
+  margin: 0;
+  box-shadow: 3px 3px 0 var(--black); /* Smaller shadow */
 }
+
+.book-card .retro-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0 var(--black);
+}
+
+.book-card .retro-btn:active {
+  transform: translateY(0);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+/* * --- FIX: Added styles for text-based availability status ---
+ * This overrides the global .status (which uses backgrounds) 
+ * to use text color, as seen in the screenshot.
+*/
+.book-card .status {
+  /* Reset global .status styles */
+  background: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  display: inline; /* Ensures it flows with the "Available:" text */
+  font-weight: bold;
+}
+
+.book-card .status.green {
+  color: #3a9d23; /* Green text */
+}
+
+.book-card .status.yellow {
+  /* Use the accent orange for 'low' stock, as in "A Legacy of Ash" */
+  color: var(--accent); 
+}
+
+.book-card .status.red {
+  color: #b22222; /* Red text for 'out of stock' */
+}
+
 
 /* ===== Members Page ===== */
-
 .members-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -386,6 +448,8 @@ main {
 .member-info-right {
   text-align: right;
 }
+
+/* ===== Transactions Page ===== */
 .transactions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -408,7 +472,7 @@ main {
 
 .transaction-card:hover {
   transform: scale(1.02);
-  background: var(--lightgray);
+  background: #ece8df; /* Slightly lighter offwhite for hover */
 }
 
 .transaction-info-left h3 {
@@ -420,19 +484,22 @@ main {
   margin: 0.2rem 0;
 }
 
-.status {
+.transaction-card .status {
   text-transform: uppercase;
   font-weight: bold;
+  /* Removed border-radius from transaction status to use a text color instead */
+  padding: 0; 
+  background: none;
 }
 
-.status.issued {
-  color: blue;
+.transaction-card .status.issued {
+  color: #007bff; /* Blue */
 }
-.status.returned {
-  color: green;
+.transaction-card .status.returned {
+  color: #3a9d23; /* Green */
 }
-.status.overdue {
-  color: red;
+.transaction-card .status.overdue {
+  color: #b22222; /* Red */
 }
 
 /* ===== ERROR PAGE ===== */
@@ -440,7 +507,8 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 45px);
+  /* Adjust height to fit above the fixed footer */
+  height: calc(100vh - 42px); 
   background: var(--offwhite);
   font-family: 'VT323', monospace;
   color: var(--black);
@@ -488,7 +556,7 @@ main {
   margin-bottom: 2rem;
 }
 
-/* =====  BUTTON ===== */
+/* ===== BUTTONS (Consolidated) ===== */
 .retro-btn {
   background: var(--mocha);
   color: var(--offwhite);
@@ -541,8 +609,7 @@ main {
   box-shadow: 2px 2px 0 var(--black);
 }
 
-/*  ===== BOOK FORM STYLES ===== */
-
+/*  ===== BOOK FORM STYLES ===== */
 .book-form {
   max-width: 700px;
   margin: 2rem auto;
@@ -592,4 +659,27 @@ main {
 .form-actions {
   text-align: center;
   margin-top: 1.5rem;
+}
+
+/* MEDIA QUERIES for responsiveness on smaller screens */
+@media (max-width: 768px) {
+    /* Collapse sidebar by default on small screens if you wish, 
+       but for now we'll just ensure main content/footer adjusts */
+    main {
+        margin-left: 70px; /* Use collapsed margin on small screens */
+    }
+    .sidebar:not(.collapsed) ~ main {
+        margin-left: 250px; /* Keep expanded if user forces it */
+    }
+    .retro-panels {
+        grid-template-columns: 1fr; /* Stack panels on small screens */
+    }
+    .footer {
+        width: calc(100% - 70px);
+        left: 70px;
+    }
+    .sidebar:not(.collapsed) ~ footer {
+        width: calc(100% - 250px);
+        left: 250px;
+    }
 }

@@ -12,7 +12,9 @@ const error = require('./utils/error.js');
 const User = require("./models/user.js");
 const Book = require("./models/book.js");
 const issue = require("./models/issue.js");
-const user = require("./models/user.js");
+const fine = require("./models/fine.js");
+const Transaction = require("./models/transaction.js");
+const { bookSchema, userSchema, transactionSchema } = require("./models/schema.js");
 
 // ---------------- MongoDB Connection ----------------
 main().then(() => {
@@ -67,15 +69,6 @@ const validateUser = (req, res, next) => {
 app.get("/", (req, res) => {
   res.render("home", { title: "Library Management System" });
 });
-
-app.get(
-  "/allbooks",
-  wrapAsync(async (req, res) => {
-    const allBooks = await Book.find({});
-    res.render("allbooks", { allBooks, title: "All Books" });
-  })
-);
-
 
 // ------------------- User Routes -------------------
 // List all users (members)
@@ -151,16 +144,17 @@ app.get(
 //--------------------- Book Routes -------------------
 
 // List all books
-app.get( "/books",
+app.get(
+  "/allbooks",
   wrapAsync(async (req, res) => {
-    const allBooks = await books.find({});
-    res.render("allbooks", { book: allBooks, title: "All Books" });
+    const allBooks = await Book.find({});
+    res.render("books/allbooks", { allBooks, title: "All Books" });
   })
 );
 
-// New Book Form
-app.get("/books/new", (req, res) => {
-  res.render("books/new", { title: "Add New Book" });
+// Add New Book Form
+app.get("/books/addbook", (req, res) => {
+  res.render("books/addbook", { title: "Add New Book" });
 });
 
 // Create New Book
@@ -168,7 +162,8 @@ app.post(
   "/books",
   validateBook,
   wrapAsync(async (req, res) => {
-    const newBook = new Book(req.body.Book);
+    const newBook = new Book(req.body);
+    console.log(req.body);
     await newBook.save();
     res.redirect("/books");
   })
@@ -291,19 +286,6 @@ app.get(
   })
 );
 
-// ------------------- Error Handler -------------------
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message = "Something went wrong!" } = err;
-  res.status(statusCode).render("error", { statusCode, message });
-});
-
-// ------------------- Additional Routes -------------------
-app.get("/allMembers",wrapAsync(async (req, res) => {
-    const allMembers = await user.find({});
-    res.render("allMembers", {allMembers, title: "All Members" });
-  })
-);
-
 app.get("/allTransactions", (req, res) => {
   const transactions = [
     {
@@ -343,8 +325,8 @@ app.get("/allTransactions", (req, res) => {
 app.get("/api/stats", wrapAsync(async (req, res) => {
   const totalBooks = await Book.countDocuments({});
   const availableBooks = await Book.countDocuments({ availableCopies: { $gt: 0 } });
-  const totalMembers = await user.countDocuments({});
-  const overdueMembers = await user.countDocuments({ overdueCount: { $gt: 0 } });
+  const totalMembers = await User.countDocuments({});
+  const overdueMembers = await User.countDocuments({ overdueCount: { $gt: 0 } });
 
   res.json({
     totalBooks,
@@ -353,6 +335,12 @@ app.get("/api/stats", wrapAsync(async (req, res) => {
     overdueMembers
   });
 }));
+
+// ------------------- Error Handler -------------------
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message = "Something went wrong!" } = err;
+  res.status(statusCode).render("error", { statusCode, message });
+});
 
 // Start server
 const PORT = 3000;

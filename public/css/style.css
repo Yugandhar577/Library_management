@@ -488,20 +488,130 @@ main {
   margin-bottom: 2rem;
 }
 
+/* =====  BUTTON ===== */
 .retro-btn {
   background: var(--mocha);
   color: var(--offwhite);
   border: 3px solid var(--black);
   box-shadow: 4px 4px 0 var(--black);
+  font-family: 'VT323', monospace;
+  font-size: 1.3rem;
   padding: 0.6rem 1.5rem;
+  text-transform: uppercase;
   text-decoration: none;
-  font-size: 1.2rem;
   transition: all 0.15s ease;
   display: inline-block;
+  cursor: pointer;
 }
 
 .retro-btn:hover {
-  background: #2b2222;
+  background: var(--accent);
+  color: var(--black);
   transform: translateY(-3px);
   box-shadow: 6px 6px 0 var(--black);
+}
+
+.retro-btn:active {
+  transform: translateY(0);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+.btn-success {
+  background: var(--accent);
+  color: var(--black);
+  border: 3px solid var(--black);
+  box-shadow: 4px 4px 0 var(--black);
+  font-family: 'VT323', monospace;
+  padding: 0.5rem 1.2rem;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-success:hover {
+  background: var(--mocha);
+  color: var(--offwhite);
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 0 var(--black);
+}
+
+.btn-success:active {
+  transform: translateY(0);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+/* .btn-cancel {
+  background: var(--mocha);
+  color: var(--offwhite);
+  border: 3px solid var(--black);
+  box-shadow: 4px 4px 0 var(--black);
+  padding: 0.5rem 1.2rem;
+  font-family: 'VT323', monospace;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  margin-left: 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: var(--accent);
+  color: var(--black);
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 0 var(--black);
+} */
+
+
+/*  ===== ADD BOOK FORM STYLES ===== */
+
+.add-book-form {
+  max-width: 700px;
+  margin: 2rem auto;
+  background: var(--offwhite);
+  border: 3px solid var(--black);
+  box-shadow: 6px 6px 0 var(--black);
+  padding: 1.5rem;
+}
+
+.add-book-form h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--black);
+  border-bottom: 3px solid var(--black);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+  color: var(--black);
+}
+
+.retro-input,
+.add-book-form textarea {
+  background: var(--offwhite);
+  border: 2px solid var(--black);
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 3px 3px 0 var(--black);
+  outline: none;
+}
+
+.retro-input:focus,
+.add-book-form textarea:focus {
+  border-color: var(--accent);
+}
+
+.form-actions {
+  text-align: center;
+  margin-top: 1.5rem;
 }

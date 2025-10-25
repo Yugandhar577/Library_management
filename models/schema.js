@@ -7,6 +7,7 @@ const bookSchema = Joi.object({
   genre: Joi.string().required(),
   publisher: Joi.string().required(),
   edition: Joi.string().required(),   
+  price: Joi.number().min(0).required(),
   availableCopies: Joi.number().min(0).required(),
   totalCopies: Joi.number().min(1).required(),
   description: Joi.string().allow("")

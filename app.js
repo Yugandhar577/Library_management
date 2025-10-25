@@ -37,9 +37,15 @@ app.set("layout", "layouts/boilerplate");
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.engine("ejs", ejsMate);
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 const validateBook = (req, res, next) => {
-  const { error } = bookSchema.validate(req.body);
+  console.log("Validating book:", req.body.book);
+  const { error } = bookSchema.validate(req.body.book);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
@@ -73,10 +79,10 @@ app.get("/", (req, res) => {
 // ------------------- User Routes -------------------
 // List all users (members)
 app.get(
-  "/users",
+  "/allmembers",
   wrapAsync(async (req, res) => {
-    const users = await User.find({});
-    res.render("users/index", { title: "All Members", users });
+    const allMembers = await User.find({});
+    res.render("users/allMembers", { title: "All Members", allMembers });
   })
 );
 
@@ -162,10 +168,9 @@ app.post(
   "/books",
   validateBook,
   wrapAsync(async (req, res) => {
-    const newBook = new Book(req.body);
-    console.log(req.body);
+    const newBook = new Book(req.body.book);
     await newBook.save();
-    res.redirect("/books");
+    res.redirect("/allbooks");
   })
 );
 
@@ -218,7 +223,7 @@ app.get(
 
 // List all transactions
 app.get(
-  "/transactions",
+  "/alltransactions",
   wrapAsync(async (req, res) => {
     const transactions = await Transaction.find({});
     res.render("transactions/index", { title: "All Transactions", transactions });
@@ -337,8 +342,8 @@ app.get("/api/stats", wrapAsync(async (req, res) => {
 }));
 
 // ------------------- Error Handler -------------------
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message = "Something went wrong!" } = err;
+app.use((Error, req, res, next) => {
+  const { statusCode = 500, message = "Something went wrong!" } = Error;
   res.status(statusCode).render("error", { statusCode, message });
 });
 

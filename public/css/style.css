@@ -434,3 +434,74 @@ main {
 .status.overdue {
   color: red;
 }
+
+/* ===== ERROR PAGE ===== */
+.error-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 45px);
+  background: var(--offwhite);
+  font-family: 'VT323', monospace;
+  color: var(--black);
+}
+
+.error-window {
+  background: var(--offwhite);
+  border: 4px solid var(--black);
+  box-shadow: 6px 6px 0 var(--black);
+  width: 480px;
+  max-width: 90%;
+}
+
+.error-title-bar {
+  background: var(--mocha);
+  color: var(--offwhite);
+  border-bottom: 3px solid var(--black);
+  padding: 0.5rem 1rem;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.error-body {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.error-code {
+  font-size: 6rem;
+  color: var(--accent);
+  margin: 0;
+  text-shadow: 3px 3px 0 var(--black);
+}
+
+.error-message {
+  font-size: 1.8rem;
+  margin: 0.5rem 0;
+}
+
+.error-subtext {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.retro-btn {
+  background: var(--mocha);
+  color: var(--offwhite);
+  border: 3px solid var(--black);
+  box-shadow: 4px 4px 0 var(--black);
+  padding: 0.6rem 1.5rem;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: all 0.15s ease;
+  display: inline-block;
+}
+
+.retro-btn:hover {
+  background: #2b2222;
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 0 var(--black);
+}

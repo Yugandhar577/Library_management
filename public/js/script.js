@@ -6,15 +6,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   // Make sure both elements were found before adding a listener
   if (toggleBtn && sidebar) {
+    // 🔽 Collapse sidebar by default on page load
+    sidebar.classList.add("collapsed");
+
     // Add the click event listener to the button
     toggleBtn.addEventListener("click", () => {
-      // This one line adds or removes the "collapsed" class
+      // Toggle the "collapsed" class on each click
       sidebar.classList.toggle("collapsed");
     });
   } else {
     console.error("Could not find toggle button or sidebar.");
   }
 });
+
 
 // === Search, Filter, Sort Logic (Reusable for Books & Members) ===
 const searchBar =

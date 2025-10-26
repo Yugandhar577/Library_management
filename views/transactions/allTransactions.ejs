@@ -1,0 +1,38 @@
+<main>
+    <div class="dashboard">
+        <h2 class="retro-title">All Transactions</h2>
+
+        <div class="toolbar">
+            <input type="text" placeholder="Search by Member or Book..." id="searchInput">
+            <select id="filterSelect">
+                <option value="all">All</option>
+                <option value="issued">Issued</option>
+                <option value="returned">Returned</option>
+                <option value="overdue">Overdue</option>
+            </select>
+            <select id="sortSelect">
+                <option value="recent">Most Recent</option>
+                <option value="oldest">Oldest</option>
+            </select>
+        </div>
+
+        <div class="transactions-grid">
+            <% transactions.forEach(transaction => { %>
+                <div class="transaction-card" onclick="window.location.href='/transactions/<%= transaction._id %>'">
+                    <div class="transaction-info-left">
+                        <h3><%= transaction.bookTitle %></h3> 
+                        <p>Issued to: <%= transaction.memberName %></p>
+                        
+                        <p>Issued on: <%= transaction.issueDateDisplay %></p>
+                    </div>
+                    <div class="transaction-info-right">
+                        <p class="status <%= transaction.status.toLowerCase() %>">
+                            <%= transaction.status %>
+                        </p>
+                        <p>Due: <%= transaction.dueDateDisplay %></p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</main>

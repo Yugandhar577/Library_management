@@ -226,7 +226,7 @@ app.get(
   "/alltransactions",
   wrapAsync(async (req, res) => {
     const transactions = await Transaction.find({});
-    res.render("transactions/index", { title: "All Transactions", transactions });
+    res.render("transactions/alltransactions", { title: "All Transactions", transactions });
   })
 );
 
@@ -290,41 +290,6 @@ app.get(
     res.render("transactions/show", { title: "Transaction Details", transaction });
   })
 );
-
-app.get("/allTransactions", (req, res) => {
-  const transactions = [
-    {
-      id: "TXN1001",
-      memberName: "Alice Johnson",
-      bookTitle: "The Art of Computer Programming",
-      issueDate: "2025-09-20",
-      dueDate: "2025-10-05",
-      status: "Returned",
-    },
-    {
-      id: "TXN1002",
-      memberName: "Ravi Sharma",
-      bookTitle: "Introduction to Algorithms",
-      issueDate: "2025-10-01",
-      dueDate: "2025-10-15",
-      status: "Issued",
-    },
-    {
-      id: "TXN1003",
-      memberName: "Mina Lee",
-      bookTitle: "Artificial Intelligence: A Modern Approach",
-      issueDate: "2025-09-10",
-      dueDate: "2025-09-25",
-      status: "Overdue",
-    },
-  ];
-
-  res.render("allTransactions", {
-    layout: "layouts/boilerplate",
-    title: "All Transactions",
-    transactions,
-  });
-});
 
 // ------------------- Dashboard Setup -------------------
 app.get("/api/stats", wrapAsync(async (req, res) => {

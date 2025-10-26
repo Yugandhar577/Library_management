@@ -1,7 +1,12 @@
 <main>
 <div class="dashboard">
   <h1 class="retro-title">All Members</h1>
-
+    <!-- Add Member Button -->
+    <div class="text-end mb-3" style="margin-bottom: 1rem;">
+      <a href="/users/addmember" class="retro-btn">
+        Add New Member
+      </a>
+    </div>
   <!-- Search & Filters -->
   <div class="toolbar">
     <input type="text" id="memberSearch" placeholder="Search members..." />
@@ -20,7 +25,7 @@
   <!-- Members Grid -->
   <div class="members-grid">
     <% allMembers.forEach(user => { %>
-      <button class="member-card" onclick="window.location.href='/members/<%= user._id %>'">
+      <button class="member-card" onclick="window.location.href='/users/<%= user._id %>'">
         <div class="member-info-left">
           <h3><%= user.name %></h3>
           <p><strong>ID:</strong> <%= user.memberId %></p>

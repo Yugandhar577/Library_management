@@ -1,0 +1,52 @@
+<main>
+<section class="settings-page">
+    <h1 class="section-title">Library Settings</h1>
+
+    <!-- General Settings -->
+    <div class="settings-card">
+    <h2>General Settings</h2>
+    <form action="/settings/general" method="POST">
+        <div class="form-group">
+        <label for="libraryName">Library Name</label>
+        <input type="text" class="retro-input" id="libraryName" name="libraryName" value="<%= settings.libraryName || '' %>">
+        </div>
+        <div class="form-group">
+        <label for="maxBooksPerUser">Max Books Per User</label>
+        <input type="number" class="retro-input" id="maxBooksPerUser" name="maxBooksPerUser" value="<%= settings.maxBooksPerUser || 5 %>">
+        </div>
+        <button type="submit" class="retro-btn">Save</button>
+    </form>
+    </div>
+
+    <!-- Fine Settings -->
+    <div class="settings-card">
+    <h2>Fine Settings</h2>
+    <form action="/settings/fines" method="POST">
+        <div class="form-group">
+        <label for="finePerDay">Fine Per Day (₹)</label>
+        <input type="number" class="retro-input" id="finePerDay" name="finePerDay" value="<%= settings.finePerDay || 5 %>">
+        </div>
+        <div class="form-group">
+        <label for="gracePeriod">Grace Period (days)</label>
+        <input type="number" class="retro-input" id="gracePeriod" name="gracePeriod" value="<%= settings.gracePeriod || 7 %>">
+        </div>
+        <button type="submit" class="retro-btn">Save</button>
+    </form>
+    </div>
+
+    <!-- System Settings -->
+    <div class="settings-card">
+    <h2>System Settings</h2>
+    <form action="/settings/system" method="POST">
+        <div class="form-group">
+        <label for="emailNotifications">Email Notifications</label>
+        <select class="retro-input" id="emailNotifications" name="emailNotifications">
+            <option value="enabled" <%= settings.emailNotifications === 'enabled' ? 'selected' : '' %>>Enabled</option>
+            <option value="disabled" <%= settings.emailNotifications === 'disabled' ? 'selected' : '' %>>Disabled</option>
+        </select>
+        </div>
+        <button type="submit" class="retro-btn">Save</button>
+    </form>
+    </div>
+</section>
+</main>

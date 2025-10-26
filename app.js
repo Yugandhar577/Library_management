@@ -47,7 +47,7 @@ const validateBook = (req, res, next) => {
   console.log("Validating book:", req.body.book);
   const { error } = bookSchema.validate(req.body.book);
   if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
+    const msg = Error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
   }
   next();
@@ -56,7 +56,7 @@ const validateBook = (req, res, next) => {
 const validateTransaction = (req, res, next) => {
   const { error } = transactionSchema.validate(req.body);
   if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
+    const msg = Error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
   }
   next();
@@ -65,7 +65,7 @@ const validateTransaction = (req, res, next) => {
 const validateUser = (req, res, next) => {
   const { error } = userSchema.validate(req.body);
   if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
+    const msg = Error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
   }
   next();
@@ -96,7 +96,7 @@ app.post(
   "/users",
   validateUser,
   wrapAsync(async (req, res) => {
-    const newUser = new User(req.body.member); // lowercase 'member' to match form field
+    const newUser = new User(req.body.member); 
     await newUser.save();
     res.redirect("/allMembers");
   })
@@ -219,6 +219,62 @@ app.get(
   })
 );
 
+//issue book
+app.get(
+  "/books/:id/issue",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    res.render("books/issue", { title: "Issue Book", book });
+  })
+);
+
+app.post(
+  "/books/:id/issue",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+
+    // Create a new transaction
+    const newTransaction = new Transaction({
+      book: book._id,
+      user: req.user._id,
+      status: "issued",
+      issueDate: new Date(),
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    });
+    await newTransaction.save();
+
+    res.redirect(`/books/${book._id}`);
+  })
+);
+
+// return book
+app.get(
+  "/books/:id/return",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    res.render("books/return", { title: "Return Book", book });
+  })
+);
+
+app.post(
+  "/books/:id/return",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    // Find the transaction and mark it as returned
+    const transaction = await Transaction.findOneAndUpdate(
+      { book: book._id, user: req.user._id, status: "issued" },
+      { status: "returned", returnDate: new Date() },
+      { new: true }
+    );
+    if (!transaction) throw new error("Transaction not found", 404);
+    res.redirect(`/books/${book._id}`);
+  })
+);
+
 //------------------- Transaction Routes -------------------
 
 // List all transactions
@@ -305,6 +361,11 @@ app.get("/api/stats", wrapAsync(async (req, res) => {
     overdueMembers
   });
 }));
+
+// ------------------- Settings -------------------
+app.get("/settings", (req, res) => {
+  res.render("settings", { title: "Settings" });
+});
 
 // ------------------- Error Handler -------------------
 app.use((Error, req, res, next) => {

@@ -673,6 +673,51 @@ footer {
   margin-top: 1.5rem;
 }
 
+/* ===== Settings Page ===== */
+.settings-page {
+  padding: 2rem;
+  background: var(--offwhite);
+  color: var(--black);
+  min-height: calc(100vh - 45px);
+}
+
+.settings-page .section-title {
+  font-size: 2rem;
+  color: var(--black);
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-card {
+  justify-content: space-between;
+  align-items: flex-start;
+  background: var(--offwhite);
+  color: var(--black);
+  border: 3px solid var(--black);
+  box-shadow: 4px 4px 0 var(--mocha);
+  padding: 1rem;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'VT323', monospace;
+}
+
+.settings-card h2 {
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.settings-card .form-group {
+  margin-bottom: 1rem;
+}
+
+.settings-card label {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+
 /* MEDIA QUERIES for responsiveness on smaller screens */
 @media (max-width: 768px) {
     /* Collapse sidebar by default on small screens if you wish, 

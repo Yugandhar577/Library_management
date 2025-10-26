@@ -1,0 +1,46 @@
+<main>
+  <div class="dashboard">
+    <h2 class="retro-title">Member Details</h2>
+    <br>
+
+    <div class="retro-window">
+      <div class="window-title">Member Info</div>
+      <div class="window-body">
+        <p><strong>Name:</strong> <%= user.name %></p>
+        <p><strong>Member ID:</strong> <%= user.memberId %></p>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Membership Type:</strong> <%= user.membershipType || "—" %></p>
+
+        <p>
+          <strong>Status:</strong>
+          <span class="<%= user.status === 'Active' ? 'status green' : 'status red' %>">
+            <%= user.status %>
+          </span>
+        </p>
+
+        <p><strong>Books Borrowed:</strong> <%= user.borrowedBooks || 0 %></p>
+
+        <p>
+          <strong>Overdue Books:</strong>
+          <span class="<%= user.overdueCount > 0 ? 'status red' : 'status green' %>">
+            <%= user.overdueCount || 0 %>
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <br>
+    <div class="mt-3">
+      <a href="/users/<%= user._id %>/editmember" class="retro-btn">Edit Member</a>
+
+      <form action="/users/<%= user._id %>?_method=DELETE" method="POST" style="display:inline;"></form>
+        <button class="retro-btn" onclick="return confirm('Delete this member permanently?')">
+          Delete Member
+        </button>
+      </form>
+
+      <a href="/allMembers" class="retro-btn">Back to List</a>
+    </div>
+  </div>
+</main>

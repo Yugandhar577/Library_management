@@ -1,9 +1,19 @@
-// === Sidebar toggle ===
-const sidebar = document.getElementById('sidebar');
-const toggleBtn = document.getElementById('toggleBtn');
+// Wait for the document to be fully loaded
+document.addEventListener("DOMContentLoaded", (event) => {
+  // Find the button and the sidebar by their IDs
+  const toggleBtn = document.getElementById("toggleBtn");
+  const sidebar = document.getElementById("sidebar");
 
-toggleBtn.addEventListener('click', () => {
-  sidebar.classList.toggle('collapsed');
+  // Make sure both elements were found before adding a listener
+  if (toggleBtn && sidebar) {
+    // Add the click event listener to the button
+    toggleBtn.addEventListener("click", () => {
+      // This one line adds or removes the "collapsed" class
+      sidebar.classList.toggle("collapsed");
+    });
+  } else {
+    console.error("Could not find toggle button or sidebar.");
+  }
 });
 
 // === Search, Filter, Sort Logic (Reusable for Books & Members) ===
@@ -85,9 +95,11 @@ const fetchStats = async () => {
     const data = await response.json();
 
     document.getElementById("totalBooks").innerText = data.totalBooks || 0;
-    document.getElementById("availableBooks").innerText = data.availableBooks || 0;
+    document.getElementById("availableBooks").innerText =
+      data.availableBooks || 0;
     document.getElementById("totalMembers").innerText = data.totalMembers || 0;
-    document.getElementById("overdueMembers").innerText = data.overdueMembers || 0;
+    document.getElementById("overdueMembers").innerText =
+      data.overdueMembers || 0;
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
   }

@@ -87,8 +87,8 @@ app.get(
 );
 
 // New User Form
-app.get("/users/new", (req, res) => {
-  res.render("users/new", { title: "Add New Member" });
+app.get("/users/addmember", (req, res) => {
+  res.render("users/addmember", { title: "Add New Member" });
 });
 
 // Create New User
@@ -96,19 +96,19 @@ app.post(
   "/users",
   validateUser,
   wrapAsync(async (req, res) => {
-    const newUser = new User(req.body.User);
+    const newUser = new User(req.body.member); // lowercase 'member' to match form field
     await newUser.save();
-    res.redirect("/users");
+    res.redirect("/allMembers");
   })
 );
 
 // Edit User Form
 app.get(
-  "/users/:id/edit",
+  "/users/:id/editmember",
   wrapAsync(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) throw new error("User not found", 404);
-    res.render("users/edit", { title: "Edit Member", user });
+    res.render("users/editmember", { title: "Edit Member", user });
   })
 );
 
@@ -159,7 +159,7 @@ app.get(
 );
 
 // Add New Book Form
-app.get("/allbooks/addbook", (req, res) => {
+app.get("/books/addbook", (req, res) => {
   res.render("books/addbook", { title: "Add New Book" });
 });
 

@@ -301,60 +301,58 @@ app.get(
 );
 
 //issue book
-// app.get(
-//   "/books/:id/issue",
-//   wrapAsync(async (req, res) => {
-//     const book = await Book.findById(req.params.id);
-//     if (!book) throw new error("Book not found", 404);
-//     res.render("books/issue", { title: "Issue Book", book });
-//   })
-// );
+app.get(
+  "/issuebooks/:id",
+  wrapAsync(async (req, res) => {
+    res.render("books/issue", { title: "Issue Book" });
+  })
+);
 
-// app.post(
-//   "/books/:id/issue",
-//   wrapAsync(async (req, res) => {
-//     const book = await Book.findById(req.params.id);
-//     if (!book) throw new error("Book not found", 404);
+app.post(
+  "/issuebooks/:id",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
 
-//     // Create a new transaction
-//     const newTransaction = new Transaction({
-//       book: book._id,
-//       user: req.user._id,
-//       status: "issued",
-//       issueDate: new Date(),
-//       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-//     });
-//     await newTransaction.save();
+    // Create a new transaction
+    const newTransaction = new Transaction({
+      book: book._id,
+      user: req.user._id,
+      status: "issued",
+      issueDate: new Date(),
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    });
+    await newTransaction.save();
 
-//     res.redirect(`/books/${book._id}`);
-//   })
-// );
+    res.redirect(`/books/${book._id}`);
+  })
+);
 
 // return book
-// app.get(
-//   "/books/:id/return",
-//   wrapAsync(async (req, res) => {
-//     const book = await Book.findById(req.params.id);
-//     if (!book) throw new error("Book not found", 404);
-//     res.render("books/return", { title: "Return Book", book });
-//   })
-// );
+app.get(
+  "/returnbooks/:id",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    res.render("books/return", { title: "Return Book", book });
+  })
+);
 
-// app.post(
-//   "/books/:id/return",
-//   wrapAsync(async (req, res) => {
-//     const book = await Book.findById(req.params.id);
-//     if (!book) throw new error("Book not found", 404);
-//     // Find the transaction and mark it as returned
-//     const transaction = await Transaction.findOneAndUpdate(
-//       { book: book._id, user: req.user._id, status: "issued" },
-//       { status: "returned", returnDate: new Date() },
-//       { new: true }
-//     );
-//     if (!transaction) throw new error("Transaction not found", 404);
-//     res.redirect(`/books/${book._id}`);
-//   })
-// );
+app.post(
+  "/returnbooks/:id",
+  wrapAsync(async (req, res) => {
+    const book = await Book.findById(req.params.id);
+    if (!book) throw new error("Book not found", 404);
+    // Find the transaction and mark it as returned
+    const transaction = await Transaction.findOneAndUpdate(
+      { book: book._id, user: req.user._id, status: "issued" },
+      { status: "returned", returnDate: new Date() },
+      { new: true }
+    );
+    if (!transaction) throw new error("Transaction not found", 404);
+    res.redirect(`/books/${book._id}`);
+  })
+);
 
 //------------------- Transaction Routes -------------------
 

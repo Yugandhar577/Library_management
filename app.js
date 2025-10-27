@@ -436,6 +436,121 @@ app.get("/actions/receive", (req, res) => {
   // render page to start the receive/return flow
   res.render("actions/receive", { title: "Receive Book" });
 });
+app.post(
+  "/actions/issue",
+  wrapAsync(async (req, res) => {
+    const { memberId, issueDate, dueDate, books } = req.body;
+
+    // 1️⃣ Parse books array safely
+    const bookList = typeof books === "string" ? JSON.parse(books) : books;
+
+    // 2️⃣ Find the member
+    const user = await User.findOne({ memberId });
+    if (!user) {
+      return res.status(400).send("Member not found!");
+    }
+
+    // 3️⃣ Validate all books exist and are available
+    const validBooks = [];
+    for (const item of bookList) {
+      const book = await Book.findById(item.bookId);
+      if (!book) {
+        return res.status(400).send(`Book not found: ${item.bookId}`);
+      }
+      if (book.availableCopies <= 0) {
+        return res.status(400).send(`Book "${book.title}" is not available`);
+      }
+      validBooks.push(book);
+    }
+
+    // 4️⃣ Process each book — create transaction + update DBs
+    const createdTxns = [];
+
+    for (const book of validBooks) {
+      // a) Create a transaction
+      const txn = new Transaction({
+        bookId: book._id,
+        userId: user._id,
+        issueDate: issueDate ? new Date(issueDate) : new Date(),
+        dueDate: dueDate
+          ? new Date(dueDate)
+          : new Date(Date.now() + 21 * 86400000),
+      });
+      await txn.save();
+      createdTxns.push(txn);
+
+      // b) Update book stock
+      book.availableCopies = Math.max(0, book.availableCopies - 1);
+      await book.save();
+
+      // c) Update user stats
+      user.borrowedBooks += 1;
+    }
+
+    await user.save();
+
+    // 5️⃣ Redirect to transactions page (or summary)
+    res.redirect("/alltransactions");
+  })
+);
+
+app.post("/actions/receive", async (req, res) => {
+  try {
+    const { memberId, memberName, receiveDate, remarks, books } = req.body;
+
+    // Parse books (comes from hidden input as JSON)
+    const parsedBooks = typeof books === "string" ? JSON.parse(books) : books;
+
+    if (
+      !parsedBooks ||
+      !Array.isArray(parsedBooks) ||
+      parsedBooks.length === 0
+    ) {
+      return res.status(400).send("No books specified for return");
+    }
+
+    // Update each book and corresponding transaction
+    for (const bookItem of parsedBooks) {
+      const { bookId } = bookItem;
+
+      // 1️⃣ Update Transaction: mark as returned
+      const txn = await Transaction.findOne({
+        bookId: bookId,
+        userId: memberId,
+        returnDate: null, // still active
+      });
+
+      if (txn) {
+        txn.returnDate = receiveDate ? new Date(receiveDate) : new Date();
+        await txn.save();
+      }
+
+      // 2️⃣ Update Book availability
+      const book = await Book.findById(bookId);
+      if (book) {
+        book.availableCopies = Math.min(
+          book.totalCopies,
+          book.availableCopies + 1
+        );
+        await book.save();
+      }
+
+      // 3️⃣ Update User borrowed count
+      const user = await User.findById(memberId);
+      if (user) {
+        user.borrowedBooks = Math.max(0, user.borrowedBooks - 1);
+        await user.save();
+      }
+    }
+
+    // Optionally log or redirect
+    console.log(`✅ Books received successfully from member ${memberId}`);
+    res.redirect("/"); // or wherever you want to show summary
+  } catch (err) {
+    console.error("❌ Error receiving books:", err);
+    res.status(500).send("Error processing returns");
+  }
+});
 
 // ------------------- Dashboard Setup -------------------
 app.get("/api/stats", wrapAsync(async (req, res) => {

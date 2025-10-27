@@ -489,8 +489,8 @@ app.post(
 
     await user.save();
 
-    // 5️⃣ Redirect to transactions page (or summary)
-    res.redirect("/alltransactions");
+    const latestTxn = createdTxns[createdTxns.length - 1];
+    res.redirect(`/transactions/${latestTxn._id}`);
   })
 );
 
@@ -545,12 +545,53 @@ app.post("/actions/receive", async (req, res) => {
 
     // Optionally log or redirect
     console.log(`✅ Books received successfully from member ${memberId}`);
-    res.redirect("/"); // or wherever you want to show summary
+    res.redirect(`/transactions/${txn._id}`);
   } catch (err) {
     console.error("❌ Error receiving books:", err);
     res.status(500).send("Error processing returns");
   }
 });
+
+app.put(
+  "/transactions/:id/return",
+  wrapAsync(async (req, res) => {
+    const { id } = req.params;
+
+    // Find the transaction
+    const transaction = await Transaction.findById(id);
+    if (!transaction) {
+      return res.status(404).send("Transaction not found");
+    }
+
+    // If it's already returned, skip update
+    if (transaction.status === "Returned") {
+      return res.redirect(`/transactions/${id}`);
+    }
+
+    // Update status and return date
+    transaction.status = "Returned";
+    transaction.returnDate = new Date();
+    await transaction.save();
+
+    // Update related Book (increment availableCopies)
+    const book = await Book.findById(transaction.bookId);
+    if (book) {
+      book.availableCopies = (book.availableCopies || 0) + 1;
+      await book.save();
+    }
+
+    // Update related User (decrement borrowedBooks)
+    const user = await User.findById(transaction.userId);
+    if (user && user.borrowedBooks > 0) {
+      user.borrowedBooks -= 1;
+      await user.save();
+    }
+
+    // ✅ Redirect back to this transaction's show page
+    res.redirect(`/transactions/${transaction._id}`);
+  })
+);
+
 
 // ------------------- Dashboard Setup -------------------
 app.get("/api/stats", wrapAsync(async (req, res) => {

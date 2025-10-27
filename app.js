@@ -221,16 +221,14 @@ app.get(
 
 //issue book
 app.get(
-  "/books/:id/issue",
+  "/issuebooks/:id",
   wrapAsync(async (req, res) => {
-    const book = await Book.findById(req.params.id);
-    if (!book) throw new error("Book not found", 404);
-    res.render("books/issue", { title: "Issue Book", book });
+    res.render("books/issue", { title: "Issue Book" });
   })
 );
 
 app.post(
-  "/books/:id/issue",
+  "/issuebooks/:id",
   wrapAsync(async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) throw new error("Book not found", 404);
@@ -251,7 +249,7 @@ app.post(
 
 // return book
 app.get(
-  "/books/:id/return",
+  "/returnbooks/:id",
   wrapAsync(async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) throw new error("Book not found", 404);
@@ -260,7 +258,7 @@ app.get(
 );
 
 app.post(
-  "/books/:id/return",
+  "/returnbooks/:id",
   wrapAsync(async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) throw new error("Book not found", 404);

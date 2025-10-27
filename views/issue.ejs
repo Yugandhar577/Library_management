@@ -1,0 +1,51 @@
+<div class="container mt-5">
+  <h1 class="text-center mb-4">📚 Library Book Catalog</h1>
+
+  <div class="text-end mb-3">
+    <a href="/books/new" class="btn btn-success">
+      Add New Book
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <% if (allBooks.length === 0) { %>
+        <div class="text-center">
+          <p class="text-muted fs-5">No books available in the catalog.</p>
+        </div>
+      <% } else { %>
+        <% allBooks.forEach(book => { %>
+          <div class="col">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title fw-bold"><%= book.title %></h5>
+                <p class="card-text text-muted mb-1"><strong>Author:</strong> <%= book.author || "—" %></p>
+                <p class="card-text mb-1"><strong>Genre:</strong> <%= book.genre || "—" %></p>
+                <p class="card-text mb-1"><strong>Publisher:</strong> <%= book.publisher || "—" %></p>
+                <p class="card-text mb-1"><strong>Edition:</strong> <%= book.edition || "—" %></p>
+                <p class="card-text mb-1"><strong>Price:</strong> ₹<%= book.price ? book.price.toFixed(2) : "0.00" %></p>
+                <p class="card-text mb-1">
+                  <strong>Copies:</strong> 
+                  <span class="<%= book.availableCopies > 0 ? 'text-success' : 'text-danger' %> fw-bold">
+                    <%= book.availableCopies %>
+                  </span>
+                  / <%= book.totalCopies %>
+                </p>
+                <p class="card-text">
+                  <%= book.description ? book.description.substring(0, 100) + (book.description.length > 100 ? '...' : '') : "—" %>
+                </p>
+              </div>
+              <div class="card-footer bg-white d-flex justify-content-between">
+                <a href="/books/<%= book._id %>" class="btn btn-sm btn-primary">View</a>
+                <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
+                <form action="/books/<%= book._id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this book permanently?')">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</div>

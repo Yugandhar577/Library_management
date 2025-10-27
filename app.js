@@ -73,8 +73,89 @@ const validateUser = (req, res, next) => {
 
 // Routes
 app.get("/", (req, res) => {
-  res.render("home", { title: "Library Management System" });
+  // Dummy data for now (can be replaced with DB fetch later)
+const transactions = [
+  {
+    memberName: "John Smith",
+    bookTitle: "The Great Gatsby",
+    status: "Returned",
+    date: "Oct 14",
+  },
+  {
+    memberName: "Emily Johnson",
+    bookTitle: "To Kill a Mockingbird",
+    status: "Issued",
+    date: "Oct 13",
+  },
+  {
+    memberName: "Michael Brown",
+    bookTitle: "1984",
+    status: "Overdue",
+    date: "Oct 12",
+  },
+  {
+    memberName: "John Smith",
+    bookTitle: "The Great Gatsby",
+    status: "Returned",
+    date: "Oct 04",
+  },
+  {
+    memberName: "Emily Johnson",
+    bookTitle: "To Kill a Mockingbird",
+    status: "Issued",
+    date: "Oct 23",
+  },
+  {
+    memberName: "Michael Brown",
+    bookTitle: "1984",
+    status: "Overdue",
+    date: "Oct 22",
+  },
+  {
+    memberName: "John Smith",
+    bookTitle: "The Great Gatsby",
+    status: "Returned",
+    date: "Oct 24",
+  },
+
+];
+
+const trends = [
+  { label: 'Mon', count: 12 },
+  { label: 'Tue', count: 9 },
+  { label: 'Wed', count: 14 },
+  { label: 'Thu', count: 7 },
+  { label: 'Fri', count: 10 },
+];
+
+const genres = [
+  { genre: 'Fiction', count: 40 },
+  { genre: 'Tech', count: 25 },
+  { genre: 'Science', count: 15 },
+  { genre: 'History', count: 10 },
+];
+
+const topBooks = [
+  { title: '1984', count: 34 },
+  { title: 'The Great Gatsby', count: 29 },
+];
+
+const activities = [
+  { member: 'John', type: 'borrowed', book: 'Inferno' },
+  { member: 'Clara', type: 'returned', book: 'Dune' },
+];
+
+// Render your home/dashboard EJS and pass the data
+res.render("home", {
+  transactions,
+  trends,
+  genres,
+  topBooks,
+  activities,
 });
+});
+
+
 
 // ------------------- User Routes -------------------
 // List all users (members)
@@ -285,9 +366,9 @@ app.get(
 );
 
 // New Transaction Form
-app.get("/transactions/new", (req, res) => {
-  res.render("transactions/new", { title: "Add New Transaction" });
-});
+// app.get("/transactions/new", (req, res) => {
+//   res.render("transactions/new", { title: "Add New Transaction" });
+// });
 
 // Create New Transaction
 app.post(
@@ -301,29 +382,29 @@ app.post(
 );
 
 // Edit Transaction Form
-app.get(
-  "/transactions/:id/edit",
-  wrapAsync(async (req, res) => {
-    const transaction = await Transaction.findById(req.params.id);
-    if (!transaction) throw new error("Transaction not found", 404);
-    res.render("transactions/edit", { title: "Edit Transaction", transaction });
-  })
-);
+// app.get(
+//   "/transactions/:id/edit",
+//   wrapAsync(async (req, res) => {
+//     const transaction = await Transaction.findById(req.params.id);
+//     if (!transaction) throw new error("Transaction not found", 404);
+//     res.render("transactions/edit", { title: "Edit Transaction", transaction });
+//   })
+// );
 
 // Update Transaction
-app.put(
-  "/transactions/:id",
-  validateTransaction,
-  wrapAsync(async (req, res) => {
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body.Transaction },
-      { new: true }
-    );
-    if (!updatedTransaction) throw new error("Transaction not found", 404);
-    res.redirect(`/transactions/${updatedTransaction._id}`);
-  })
-);
+// app.put(
+//   "/transactions/:id",
+//   validateTransaction,
+//   wrapAsync(async (req, res) => {
+//     const updatedTransaction = await Transaction.findByIdAndUpdate(
+//       req.params.id,
+//       { ...req.body.Transaction },
+//       { new: true }
+//     );
+//     if (!updatedTransaction) throw new error("Transaction not found", 404);
+//     res.redirect(`/transactions/${updatedTransaction._id}`);
+//   })
+// );
 
 // Delete Transaction
 app.delete(
@@ -331,7 +412,7 @@ app.delete(
   wrapAsync(async (req, res) => {
     const deleted = await Transaction.findByIdAndDelete(req.params.id);
     if (!deleted) throw new error("Transaction not found", 404);
-    res.redirect("/transactions");
+    res.redirect("/allTransactions");
   })
 );
 
@@ -344,6 +425,17 @@ app.get(
     res.render("transactions/show", { title: "Transaction Details", transaction });
   })
 );
+
+// ------------------- Action Routes (issue / receive) -------------------
+app.get("/actions/issue", (req, res) => {
+  // render page to start the issue flow (select member, book, etc.)
+  res.render("actions/issue", { title: "Issue Book" });
+});
+
+app.get("/actions/receive", (req, res) => {
+  // render page to start the receive/return flow
+  res.render("actions/receive", { title: "Receive Book" });
+});
 
 // ------------------- Dashboard Setup -------------------
 app.get("/api/stats", wrapAsync(async (req, res) => {

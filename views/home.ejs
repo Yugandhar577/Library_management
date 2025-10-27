@@ -1,5 +1,4 @@
 <div class="dashboard-container">
-
   <!-- Main Area -->
   <main class="main-content">
     <!-- Retro Dashboard -->
@@ -8,53 +7,119 @@
 
       <!-- Retro Stats -->
       <div class="stats">
-        <div class="stat-box">
-          <h3>Total Books</h3>
-          <p id="totalBooks">—</p>
-        </div>
-        <div class="stat-box">
-          <h3>Available</h3>
-          <p id="availableBooks">—</p>
-        </div>
-        <div class="stat-box">
-          <h3>Members</h3>
-          <p id="totalMembers">—</p>
-        </div>
-        <div class="stat-box">
-          <h3>Overdue</h3>
-          <p id="overdueMembers">—</p>
-        </div>
+        <div class="stat-box"><h3>Total Books</h3><p id="totalBooks">—</p></div>
+        <div class="stat-box"><h3>Available</h3><p id="availableBooks">—</p></div>
+        <div class="stat-box"><h3>Members</h3><p id="totalMembers">—</p></div>
+        <div class="stat-box"><h3>Overdue</h3><p id="overdueMembers">—</p></div>
       </div>
+
       <!-- Tables & Panels -->
       <div class="retro-panels">
+
+        <!-- Recent Transactions -->
         <div class="retro-window">
           <div class="window-title">Recent Transactions</div>
           <div class="window-body">
             <table class="retro-table">
               <thead>
-                <tr><th>Member</th><th>Book</th><th>Status</th><th>Date</th></tr>
+                <tr>
+                  <th>Member</th><th>Book</th><th>Status</th><th>Date</th>
+                </tr>
               </thead>
               <tbody>
-                <tr><td>John Smith</td><td>The Great Gatsby</td><td><span class="status green">Returned</span></td><td>Oct 14</td></tr>
-                <tr><td>Emily Johnson</td><td>To Kill a Mockingbird</td><td><span class="status yellow">Issued</span></td><td>Oct 13</td></tr>
-                <tr><td>Michael Brown</td><td>1984</td><td><span class="status red">Overdue</span></td><td>Oct 02</td></tr>
+                <% if (transactions && transactions.length > 0) { %>
+                  <% transactions.forEach(txn => { %>
+                    <tr>
+                      <td><%= txn.memberName %></td>
+                      <td><%= txn.bookTitle %></td>
+                      <td>
+                        <% if (txn.status === 'Returned') { %>
+                          <span class="status green"><%= txn.status %></span>
+                        <% } else if (txn.status === 'Issued') { %>
+                          <span class="status yellow"><%= txn.status %></span>
+                        <% } else { %>
+                          <span class="status red"><%= txn.status %></span>
+                        <% } %>
+                      </td>
+                      <td><%= txn.date %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="4" class="muted">No recent transactions</td></tr>
+                <% } %>
               </tbody>
             </table>
           </div>
         </div>
 
+        <!-- Borrowing Trends (Bar Chart) -->
         <div class="retro-window">
-          <div class="window-title">System Alerts</div>
+          <div class="window-title">Borrowing Trends</div>
+          <div class="window-body chart-body">
+            <canvas id="borrowTrendsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Genre Distribution (Pie Chart) -->
+        <div class="retro-window">
+          <div class="window-title">Genre Distribution</div>
+          <div class="window-body chart-body">
+            <canvas id="genreChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Borrowed Books -->
+        <div class="retro-window">
+          <div class="window-title">Top Borrowed Books</div>
           <div class="window-body">
-            <ul class="alerts">
-              <li class="red">24 Books Overdue</li>
-              <li class="yellow">3 Pending Reservations</li>
-              <li class="green">Backup Successful</li>
+            <ul class="retro-list">
+              <% if (topBooks && topBooks.length > 0) { %>
+                <% topBooks.forEach(book => { %>
+                  <li><strong><%= book.title %></strong> — <%= book.count %> lends</li>
+                <% }) %>
+              <% } else { %>
+                <li class="muted">No data available</li>
+              <% } %>
             </ul>
           </div>
         </div>
+
+        <!-- Recent Member Activity -->
+        <div class="retro-window">
+          <div class="window-title">Recent Member Activity</div>
+          <div class="window-body">
+            <ul class="retro-list">
+              <% if (activities && activities.length > 0) { %>
+                <% activities.forEach(activity => { %>
+                  <li>👤 <%= activity.member %> 
+                    <% if (activity.type === 'borrowed') { %>
+                      borrowed "<%= activity.book %>"
+                    <% } else if (activity.type === 'returned') { %>
+                      returned "<%= activity.book %>"
+                    <% } else if (activity.type === 'overdue') { %>
+                      <span class="status red">overdue: "<%= activity.book %>"</span>
+                    <% } %>
+                  </li>
+                <% }) %>
+              <% } else { %>
+                <li class="muted">No recent activity</li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
 </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Pass backend data to JS via data attributes -->
+    <script id="dashboard-data"
+      type="application/json">
+      {
+        "trends": <%- JSON.stringify(trends || []) %>,
+        "genres": <%- JSON.stringify(genres || []) %>
+      }
+    </script>

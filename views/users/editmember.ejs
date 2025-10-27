@@ -1,91 +1,90 @@
 <main>
-    <div class="dashboard">
-        <h2 class="retro-title">Edit Member</h2>
+    <div class="book-form">
+        <h1>Edit Member</h1>
 
-        <div class="retro-window"></div>
-            <div class="window-title">Member Details</div>
-            <div class="window-body"></div>
-                <form action="/allMembers/<%= user._id %>?_method=PUT" method="POST">
-
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="user[name]"
-                            value="<%= user.name %>"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="memberId">Member ID</label>
-                        <input
-                            type="text"
-                            id="memberId"
-                            name="user[memberId]"
-                            value="<%= user.memberId %>"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="user[email]"
-                            value="<%= user.email %>"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="membershipType">Membership Type</label>
-                        <select id="membershipType" name="user[membershipType]" required>
-                            <option value="Standard" <%= user.membershipType === 'Standard' ? 'selected' : '' %>>Standard</option>
-                            <option value="Premium" <%= user.membershipType === 'Premium' ? 'selected' : '' %>>Premium</option>
-                            <option value="Student" <%= user.membershipType === 'Student' ? 'selected' : '' %>>Student</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select id="status" name="user[status]" required></select>
-                            <option value="Active" <%= user.status === 'Active' ? 'selected' : '' %>>Active</option>
-                            <option value="Suspended" <%= user.status === 'Suspended' ? 'selected' : '' %>>Suspended</option>
-                            <option value="Inactive" <%= user.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="borrowedBooks">Borrowed Books</label>
-                        <input
-                            type="number"
-                            id="borrowedBooks"
-                            name="user[borrowedBooks]"
-                            value="<%= user.borrowedBooks %>"
-                            min="0"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="overdueCount">Overdue Count</label>
-                        <input
-                            type="number"
-                            id="overdueCount"
-                            name="user[overdueCount]"
-                            value="<%= user.overdueCount %>"
-                            min="0"
-                        />
-                    </div>
-
-                    <div class="text-start"></div>
-                        <button type="submit" class="retro-btn">Update Member</button>
-                        <a href="/allMembers" class="retro-btn" style="background: #b22222; margin-left: 1rem;">Cancel</a>
-                    </div>
-                </form>
+        <form action="/allMembers/<%= user._id %>?_method=PUT" method="POST">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="user[name]"
+                    value="<%= user.name %>"
+                    required
+                    class="retro-input"
+                />
             </div>
-        </div>
+
+            <div class="form-group">
+                <label for="memberId">Member ID</label>
+                <input
+                    type="text"
+                    id="memberId"
+                    name="user[memberId]"
+                    value="<%= user.memberId %>"
+                    required
+                    class="retro-input"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="user[email]"
+                    value="<%= user.email %>"
+                    required
+                    class="retro-input"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="membershipType">Membership Type</label>
+                <select id="membershipType" name="user[membershipType]" required class="retro-input">
+                    <option value="Standard" <%= user.membershipType === 'Standard' ? 'selected' : '' %>>Standard</option>
+                    <option value="Premium" <%= user.membershipType === 'Premium' ? 'selected' : '' %>>Premium</option>
+                    <option value="Student" <%= user.membershipType === 'Student' ? 'selected' : '' %>>Student</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="user[status]" required class="retro-input">
+                    <option value="Active" <%= user.status === 'Active' ? 'selected' : '' %>>Active</option>
+                    <option value="Suspended" <%= user.status === 'Suspended' ? 'selected' : '' %>>Suspended</option>
+                    <option value="Inactive" <%= user.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="borrowedBooks">Borrowed Books</label>
+                <input
+                    type="number"
+                    id="borrowedBooks"
+                    name="user[borrowedBooks]"
+                    value="<%= user.borrowedBooks %>"
+                    min="0"
+                    class="retro-input"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="overdueCount">Overdue Count</label>
+                <input
+                    type="number"
+                    id="overdueCount"
+                    name="user[overdueCount]"
+                    value="<%= user.overdueCount %>"
+                    min="0"
+                    class="retro-input"
+                />
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-success">💾 Update Member</button>
+                <a href="/allMembers" class="retro-btn" style="background: #b22222; margin-left: 1rem;">Cancel</a>
+            </div>
+        </form>
     </div>
 </main>

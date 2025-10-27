@@ -21,9 +21,8 @@
                 <div class="transaction-card" onclick="window.location.href='/transactions/<%= transaction._id %>'">
                     <div class="transaction-info-left">
                         <h3><%= transaction.bookTitle %></h3> 
-                        <p>Issued to: <%= transaction.memberName %></p>
-                        
-                        <p>Issued on: <%= transaction.issueDateDisplay %></p>
+                        <p>Issued to: <%= transaction.userId %></p>
+                        <p>Issued on: <%= transaction.issueDate %></p>
                     </div>
                     <div class="transaction-info-right">
                         <p class="status <%= transaction.status.toLowerCase() %>">

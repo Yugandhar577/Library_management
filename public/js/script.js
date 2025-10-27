@@ -1,17 +1,11 @@
 // Wait for the document to be fully loaded
 document.addEventListener("DOMContentLoaded", (event) => {
-  // Find the button and the sidebar by their IDs
   const toggleBtn = document.getElementById("toggleBtn");
   const sidebar = document.getElementById("sidebar");
 
-  // Make sure both elements were found before adding a listener
   if (toggleBtn && sidebar) {
-    // 🔽 Collapse sidebar by default on page load
     sidebar.classList.add("collapsed");
-
-    // Add the click event listener to the button
     toggleBtn.addEventListener("click", () => {
-      // Toggle the "collapsed" class on each click
       sidebar.classList.toggle("collapsed");
     });
   } else {

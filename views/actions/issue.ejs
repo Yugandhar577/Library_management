@@ -1,0 +1,87 @@
+<main class="container">
+    <h1 class="page-title">Issue Books</h1>
+
+    <!-- Transaction details (using retro/window/card styles from provided CSS) -->
+    <section class="retro-window card--padded" aria-labelledby="txn-details-title">
+        <div class="window-title" id="txn-details-title">Transaction Details</div>
+        <div class="window-body">
+
+            <form id="issueForm" action="/transactions/issue" method="POST" class="book-form">
+                <!-- essential details -->
+                <div class="form-group">
+                    <label for="memberId">Member ID</label>
+                    <input id="memberId" name="memberId" type="text" required class="retro-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="memberName">Member Name</label>
+                    <input id="memberName" name="memberName" type="text" class="retro-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="issueDate">Issue Date</label>
+                    <input id="issueDate" name="issueDate" type="date" required class="retro-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="dueDate">Due Date</label>
+                    <input id="dueDate" name="dueDate" type="date" required class="retro-input" />
+                </div>
+
+                <input type="hidden" id="booksInput" name="books" value="[]" />
+
+                <!-- Cart / books list -->
+                <div class="retro-window" style="margin-top:1rem;">
+                    <div class="window-title">Books to Issue</div>
+                    <div class="window-body">
+
+                        <!-- Add book quick form (toolbar style) -->
+                        <div class="toolbar form-inline" style="margin-bottom:0.6rem;">
+                            <input id="bookId" type="text" placeholder="Book ID (ISBN / internal id)" class="retro-input" />
+                            <input id="bookTitle" type="text" placeholder="Title" class="retro-input" />
+                            <input id="bookAuthor" type="text" placeholder="Author" class="retro-input" />
+                            <button type="button" id="addBookBtn" class="retro-btn">Add</button>
+                        </div>
+
+                        <!-- Cart table -->
+                        <table id="cartTable" class="retro-table" aria-label="Books cart" style="margin-top:1rem; width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Book ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- rows added by client script -->
+                                <% if (typeof cart !== 'undefined' && Array.isArray(cart) && cart.length) { %>
+                                    <% cart.forEach(function(item, idx){ %>
+                                        <tr data-index="<%= idx %>">
+                                            <td><%= idx+1 %></td>
+                                            <td class="cell-bookId"><%= item.bookId %></td>
+                                            <td class="cell-title"><%= item.title %></td>
+                                            <td class="cell-author"><%= item.author %></td>
+                                            <td><button type="button" class="retro-btn btn--danger removeBtn">Remove</button></td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr id="emptyRow"><td colspan="5" class="muted">No books added</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top:1rem;">
+                    <button type="submit" id="issueBtn" class="btn-success">Issue Books</button>
+                </div>
+            </form>
+
+        </div>
+    </section>
+</main>
+
+

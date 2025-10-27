@@ -1,0 +1,50 @@
+<main>
+    <div class="dashboard"></div>
+        <h2 class="retro-title">Transaction Details</h2>
+
+        <br>
+        <div class="retro-window">
+            <div class="window-title">Transaction Info</div>
+            <div class="window-body">
+                <p><strong>Transaction ID:</strong> <%= transaction._id %></p>
+                <hr class="retro-hr">
+
+                <p><strong>Book ID:</strong> <%= transaction.bookId %></p>
+                <p><strong>User ID:</strong> <%= transaction.userId %></p>
+                <hr class="retro-hr">
+
+                <% const status = transaction.status; %>
+                <p><strong>Status:</strong>
+                    <span class="status <%= status === 'Returned' ? 'green' : status === 'Overdue' ? 'red' : 'yellow' %>">
+                        <%= status %>
+                    </span>
+                </p>
+
+                <p><strong>Issue Date:</strong>
+                    <%= transaction.issueDate ? transaction.issueDate.toISOString().slice(0, 10) : '—' %>
+                </p>
+
+                <p><strong>Due Date:</strong> <%= transaction.dueDateDisplay %></p>
+
+                <p><strong>Return Date:</strong>
+                    <%= transaction.returnDate ? transaction.returnDate.toISOString().slice(0, 10) : '—' %>
+                </p>
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="mt-3">
+            <% if (transaction.status !== 'Returned') { %>
+                <form action="/transactions/<%= transaction._id %>/return?_method=PUT" method="POST" style="display:inline;">
+                    <button class="retro-btn">Mark as Returned</button>
+                </form>
+            <% } %>
+
+            <form action="/transactions/<%= transaction._id %>?_method=DELETE" method="POST" style="display:inline;">
+                <button class="retro-btn" onclick="return confirm('Delete this transaction permanently?')">Delete Transaction</button>
+            </form>
+
+            <a href="/allTransactions" class="retro-btn">Back to List</a>
+        </div>
+    </div>
+</main>

@@ -2,10 +2,10 @@
 <div class="dashboard">
   <h2 class="retro-title">Edit Book</h2>
 
-  <div class="retro-window">
+  <div class="retro-window card--padded"></div>
     <div class="window-title">Book Details</div>
     <div class="window-body">
-      <form action="/books/<%= book._id %>?_method=PUT" method="POST">
+      <form action="/books/<%= book._id %>?_method=PUT" method="POST"></form>
         <div class="form-group">
           <label for="title">Title</label>
           <input
@@ -14,6 +14,7 @@
             name="book[title]"
             value="<%= book.title %>"
             required
+            class="retro-input"
           />
         </div>
 
@@ -24,6 +25,7 @@
             id="author"
             name="book[author]"
             value="<%= book.author %>"
+            class="retro-input"
           />
         </div>
 
@@ -34,6 +36,7 @@
             id="genre"
             name="book[genre]"
             value="<%= book.genre %>"
+            class="retro-input"
           />
         </div>
 
@@ -44,6 +47,7 @@
             id="publisher"
             name="book[publisher]"
             value="<%= book.publisher %>"
+            class="retro-input"
           />
         </div>
 
@@ -54,6 +58,7 @@
             id="edition"
             name="book[edition]"
             value="<%= book.edition %>"
+            class="retro-input"
           />
         </div>
 
@@ -65,16 +70,20 @@
             id="price"
             name="book[price]"
             value="<%= book.price %>"
+            class="retro-input"
           />
         </div>
 
-                <div class="form-group">
+        <div class="form-group">
           <label for="totalCopies">Total Copies</label>
           <input
             type="number"
             id="totalCopies"
             name="book[totalCopies]"
             value="<%= book.totalCopies %>"
+            class="retro-input"
+            min="1"
+            required
           />
         </div>
 
@@ -85,6 +94,9 @@
             id="availableCopies"
             name="book[availableCopies]"
             value="<%= book.availableCopies %>"
+            class="retro-input"
+            min="0"
+            required
           />
         </div>
 
@@ -94,11 +106,12 @@
             id="description"
             name="book[description]"
             rows="4"
+            class="retro-input"
           ><%= book.description %></textarea>
         </div>
 
-        <div class="text-start">
-          <button type="submit" class="retro-btn">Update Book</button>
+        <div class="form-actions" style="margin-top:1rem;">
+          <button type="submit" class="btn-success">Update Book</button>
           <a href="/allbooks" class="retro-btn" style="background: #b22222; margin-left: 1rem;">Cancel</a>
         </div>
       </form>

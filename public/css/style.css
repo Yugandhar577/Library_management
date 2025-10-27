@@ -22,8 +22,8 @@ body {
 
 .dashboard-container {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow: visible;
 }
 
 /* --- SIDEBAR --- */
@@ -767,3 +767,11 @@ footer {
     max-width: 110%; /* Smaller for collapsed state */
 }
 
+.chart-body canvas#genreChart {
+  width: 360px !important;   /* smaller width */
+  height: 360px !important;  /* smaller height */
+  image-rendering: pixelated; /* make the rendering blocky */
+  transform: scale(1);
+  margin: 0 auto;
+  display: block;
+}

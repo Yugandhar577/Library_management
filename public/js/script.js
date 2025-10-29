@@ -1,5 +1,5 @@
-// Wait for the document to be fully loaded
-document.addEventListener("DOMContentLoaded", (event) => {
+// === Sidebar Toggle ===
+document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("toggleBtn");
   const sidebar = document.getElementById("sidebar");
 
@@ -13,26 +13,34 @@ document.addEventListener("DOMContentLoaded", (event) => {
   }
 });
 
-
-// === Search, Filter, Sort Logic (Reusable for Books & Members) ===
+// === Shared Search, Filter, Sort ===
 const searchBar =
   document.getElementById("searchBar") ||
-  document.getElementById("memberSearch");
-const filterStatus = document.getElementById("filterStatus");
-const sortBy = document.getElementById("sortBy");
+  document.getElementById("memberSearch") ||
+  document.getElementById("searchInput");
+
+const filterStatus =
+  document.getElementById("filterStatus") ||
+  document.getElementById("filterSelect");
+
+const sortBy =
+  document.getElementById("sortBy") || document.getElementById("sortSelect");
+
 const filterMembership = document.getElementById("filterMembership");
 
-// Detect page type
+// Detect current page
 const isBooksPage = document.querySelector(".book-card");
 const isMembersPage = document.querySelector(".member-card");
+const isTransactionsPage = document.querySelector(".transaction-card");
 
+// === Apply Filters (Books, Members, Transactions) ===
 const applyFilters = () => {
   const query = searchBar ? searchBar.value.toLowerCase() : "";
-  const statusFilter = filterStatus ? filterStatus.value : "all";
+  const statusFilter = filterStatus ? filterStatus.value.toLowerCase() : "all";
   const sortOption = sortBy ? sortBy.value : null;
   const membershipFilter = filterMembership ? filterMembership.value : "all";
 
-  // --- For Books ---
+  // --- 📚 Books ---
   if (isBooksPage) {
     const cards = Array.from(document.querySelectorAll(".book-card"));
     const grid = document.querySelector(".books-grid");
@@ -47,23 +55,40 @@ const applyFilters = () => {
       card.style.display = matchesQuery && matchesStatus ? "flex" : "none";
     });
 
-    // Optional sorting (by title, author, year)
-    if (sortOption) {
-      const visibleCards = cards.filter((c) => c.style.display !== "none");
-      visibleCards.sort((a, b) => {
-        const aText =
-          a.querySelector(`.book-info-left p strong:nth-child(1)`)?.innerText ||
-          "";
-        const bText =
-          b.querySelector(`.book-info-left p strong:nth-child(1)`)?.innerText ||
-          "";
-        return aText.localeCompare(bText);
-      });
-      visibleCards.forEach((card) => grid.appendChild(card));
+    // Optional sorting (alphabetical)
+if (sortOption) {
+  const visibleCards = cards.filter((c) => c.style.display !== "none");
+
+  visibleCards.sort((a, b) => {
+    let aText = "";
+    let bText = "";
+
+    if (sortOption === "title") {
+      aText = a.querySelector("h3")?.innerText.toLowerCase() || "";
+      bText = b.querySelector("h3")?.innerText.toLowerCase() || "";
+    } 
+    else if (sortOption === "author") {
+      aText =
+        a.querySelector(".book-info-left p:nth-child(2)")?.innerText
+          .replace("Author:", "")
+          .trim()
+          .toLowerCase() || "";
+      bText =
+        b.querySelector(".book-info-left p:nth-child(2)")?.innerText
+          .replace("Author:", "")
+          .trim()
+          .toLowerCase() || "";
     }
+
+    return aText.localeCompare(bText);
+  });
+
+  // Re-append sorted cards
+  visibleCards.forEach((card) => grid.appendChild(card));
+}
   }
 
-  // --- For Members ---
+  // --- 👥 Members ---
   if (isMembersPage) {
     const cards = Array.from(document.querySelectorAll(".member-card"));
     const grid = document.querySelector(".members-grid");
@@ -84,256 +109,157 @@ const applyFilters = () => {
         matchesQuery && matchesMembership && matchesStatus ? "flex" : "none";
     });
   }
+
+  // --- 🔄 Transactions ---
+  if (isTransactionsPage) {
+    const cards = Array.from(document.querySelectorAll(".transaction-card"));
+    const grid = document.querySelector(".transactions-grid");
+
+    cards.forEach((card) => {
+      const bookTitle = card.querySelector("h3").innerText.toLowerCase();
+      const member = card
+        .querySelector(".transaction-info-left p")
+        .innerText.toLowerCase();
+      const status = card.querySelector(".status").innerText.toLowerCase();
+
+      const matchesQuery = bookTitle.includes(query) || member.includes(query);
+      const matchesStatus =
+        statusFilter === "all" || status.includes(statusFilter);
+
+      card.style.display = matchesQuery && matchesStatus ? "flex" : "none";
+    });
+
+    // Sorting by issue date
+    if (sortOption) {
+      const visibleCards = cards.filter((c) => c.style.display !== "none");
+      visibleCards.sort((a, b) => {
+        const aDate = new Date(
+          a.querySelector(".transaction-info-left p:nth-child(3)").innerText
+        );
+        const bDate = new Date(
+          b.querySelector(".transaction-info-left p:nth-child(3)").innerText
+        );
+        return sortOption === "recent" ? bDate - aDate : aDate - bDate;
+      });
+      visibleCards.forEach((card) => grid.appendChild(card));
+    }
+  }
 };
-// ...existing code...
-    // issue book
-    (function () {
-        // Utilities
-        const $ = id => document.getElementById(id);
-        const issueForm = $('issueForm');
-        // Bail out if we're not on the Issue page
-        if (!issueForm) return;
 
-        const bookIdInput = $('bookId');
-        const bookTitleInput = $('bookTitle');
-        const bookAuthorInput = $('bookAuthor');
-        const addBookBtn = $('addBookBtn');
-        const cartTableBody = document.querySelector('#cartTable tbody');
-        const booksInput = $('booksInput');
-        const emptyRowId = 'emptyRow';
+// === Event Bindings for Filters ===
+if (searchBar) searchBar.addEventListener("input", applyFilters);
+if (filterStatus) filterStatus.addEventListener("change", applyFilters);
+if (sortBy) sortBy.addEventListener("change", applyFilters);
+if (filterMembership) filterMembership.addEventListener("change", applyFilters);
 
-        // If required elements are missing, stop (defensive)
-        if (!cartTableBody || !booksInput) return;
+// === Issue & Receive Book Logic ===
+// (unchanged from your current version)
+(function issueBook() {
+  const $ = (id) => document.getElementById(id);
+  const issueForm = $("issueForm");
+  if (!issueForm) return;
 
-        // Initialize cart from server-rendered rows if any
-        let cart = [];
-        Array.from(cartTableBody.querySelectorAll('tr')).forEach(row => {
-            if (row.id === emptyRowId) return;
-            const idCell = row.querySelector('.cell-bookId');
-            const titleCell = row.querySelector('.cell-title');
-            const authorCell = row.querySelector('.cell-author');
-            if (idCell && titleCell) {
-                cart.push({
-                    bookId: idCell.textContent.trim(),
-                    title: titleCell.textContent.trim(),
-                    author: authorCell ? authorCell.textContent.trim() : ''
-                });
-            }
-        });
-        refreshHiddenInput();
+  const bookIdInput = $("bookId");
+  const bookTitleInput = $("bookTitle");
+  const bookAuthorInput = $("bookAuthor");
+  const addBookBtn = $("addBookBtn");
+  const cartTableBody = document.querySelector("#cartTable tbody");
+  const booksInput = $("booksInput");
+  const emptyRowId = "emptyRow";
 
-        // default dates: issue = today, due = +14 days
-        const issueDateEl = $('issueDate');
-        const dueDateEl = $('dueDate');
-        const today = new Date();
-        const pad = n => n.toString().padStart(2, '0');
-        const isoDate = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-        if (issueDateEl && !issueDateEl.value) issueDateEl.value = isoDate(today);
-        if (dueDateEl && !dueDateEl.value) {
-            const due = new Date(today);
-            due.setDate(due.getDate() + 14);
-            dueDateEl.value = isoDate(due);
-        }
+  if (!cartTableBody || !booksInput) return;
+  let cart = [];
 
-        // Add book to cart (guard addBookBtn)
-        if (addBookBtn) {
-            addBookBtn.addEventListener('click', () => {
-                const bookId = bookIdInput.value.trim();
-                const title = bookTitleInput.value.trim();
-                const author = bookAuthorInput.value.trim();
+  Array.from(cartTableBody.querySelectorAll("tr")).forEach((row) => {
+    if (row.id === emptyRowId) return;
+    const idCell = row.querySelector(".cell-bookId");
+    const titleCell = row.querySelector(".cell-title");
+    const authorCell = row.querySelector(".cell-author");
+    if (idCell && titleCell) {
+      cart.push({
+        bookId: idCell.textContent.trim(),
+        title: titleCell.textContent.trim(),
+        author: authorCell ? authorCell.textContent.trim() : "",
+      });
+    }
+  });
 
-                if (!bookId || !title) {
-                    alert('Please provide at least Book ID and Title.');
-                    return;
-                }
+  const refreshHiddenInput = () => {
+    booksInput.value = JSON.stringify(cart);
+  };
 
-                cart.push({ bookId, title, author });
-                renderCart();
-                bookIdInput.value = '';
-                bookTitleInput.value = '';
-                bookAuthorInput.value = '';
-                bookIdInput.focus();
-            });
-        }
+  const renderCart = () => {
+    cartTableBody.innerHTML = "";
+    if (cart.length === 0) {
+      const tr = document.createElement("tr");
+      tr.id = emptyRowId;
+      tr.innerHTML = '<td colspan="5" class="muted">No books added</td>';
+      cartTableBody.appendChild(tr);
+    } else {
+      cart.forEach((item, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td class="cell-bookId">${escapeHtml(item.bookId)}</td>
+          <td class="cell-title">${escapeHtml(item.title)}</td>
+          <td class="cell-author">${escapeHtml(item.author)}</td>
+          <td><button type="button" class="retro-btn btn--danger removeBtn">Remove</button></td>`;
+        cartTableBody.appendChild(tr);
+      });
+    }
+    refreshHiddenInput();
+  };
 
-        // Remove book (delegate)
-        cartTableBody.addEventListener('click', (e) => {
-            if (!e.target.matches('.removeBtn')) return;
-            const tr = e.target.closest('tr');
-            const idx = Array.from(cartTableBody.querySelectorAll('tr')).indexOf(tr);
-            // adjust index if emptyRow present
-            if (cartTableBody.querySelector('#' + emptyRowId)) return;
-            if (idx >= 0 && idx < cart.length) {
-                cart.splice(idx, 1);
-                renderCart();
-            }
-        });
+  const escapeHtml = (str) =>
+    String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
 
-        // Form submit: attach books JSON
-        issueForm.addEventListener('submit', (e) => {
-            if (cart.length === 0) {
-                e.preventDefault();
-                alert('Please add at least one book to issue.');
-                return;
-            }
-            refreshHiddenInput();
-            // allow normal submit
-        });
+  if (addBookBtn) {
+    addBookBtn.addEventListener("click", () => {
+      const bookId = bookIdInput.value.trim();
+      const title = bookTitleInput.value.trim();
+      const author = bookAuthorInput.value.trim();
 
-        function renderCart() {
-            // clear
-            cartTableBody.innerHTML = '';
-            if (cart.length === 0) {
-                const tr = document.createElement('tr');
-                tr.id = emptyRowId;
-                const td = document.createElement('td');
-                td.colSpan = 5;
-                td.className = 'muted';
-                td.textContent = 'No books added';
-                tr.appendChild(td);
-                cartTableBody.appendChild(tr);
-            } else {
-                cart.forEach((item, idx) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${idx+1}</td>
-                        <td class="cell-bookId">${escapeHtml(item.bookId)}</td>
-                        <td class="cell-title">${escapeHtml(item.title)}</td>
-                        <td class="cell-author">${escapeHtml(item.author || '')}</td>
-                        <td><button type="button" class="retro-btn btn--danger removeBtn">Remove</button></td>
-                    `;
-                    cartTableBody.appendChild(tr);
-                });
-            }
-            refreshHiddenInput();
-        }
+      if (!bookId || !title) {
+        alert("Please provide at least Book ID and Title.");
+        return;
+      }
 
-        function refreshHiddenInput() {
-            booksInput.value = JSON.stringify(cart);
-        }
+      cart.push({ bookId, title, author });
+      renderCart();
+      bookIdInput.value = "";
+      bookTitleInput.value = "";
+      bookAuthorInput.value = "";
+      bookIdInput.focus();
+    });
+  }
 
-        // simple escaper for insertion into innerHTML
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-    })();
+  cartTableBody.addEventListener("click", (e) => {
+    if (!e.target.matches(".removeBtn")) return;
+    const tr = e.target.closest("tr");
+    const idx = Array.from(cartTableBody.querySelectorAll("tr")).indexOf(tr);
+    if (idx >= 0 && idx < cart.length) {
+      cart.splice(idx, 1);
+      renderCart();
+    }
+  });
 
-    // receive book
+  issueForm.addEventListener("submit", (e) => {
+    if (cart.length === 0) {
+      e.preventDefault();
+      alert("Please add at least one book to issue.");
+    }
+    refreshHiddenInput();
+  });
 
-    (function(){
-        // initialize client-side cart from server-provided variable `cart` if present
-        // If using server-side templating, render the initial cart into the page as a global:
-        //   <script>window.__INITIAL_CART = <%= JSON.stringify(cart || []) %>;</script>
-        // This file (served as a static JS) will then read window.__INITIAL_CART safely.
-        const initialCart = (typeof window !== 'undefined' && Array.isArray(window.__INITIAL_CART)) ? window.__INITIAL_CART.slice() : [];
+  renderCart();
+})();
 
-        let clientCart = Array.isArray(initialCart) ? initialCart.slice() : [];
-
-        const booksInput = document.getElementById('booksInput');
-        const cartTableBody = document.querySelector('#cartTable tbody');
-
-        // If required elements aren't on this page, don't run receive logic
-        if (!booksInput || !cartTableBody) return;
-
-        const bookIdEl = document.getElementById('bookId');
-        const bookTitleEl = document.getElementById('bookTitle');
-        const bookAuthorEl = document.getElementById('bookAuthor');
-        const bookConditionEl = document.getElementById('bookCondition');
-        const addBookBtn = document.getElementById('addBookBtn');
-
-        function updateHidden() {
-            booksInput.value = JSON.stringify(clientCart);
-        }
-
-        function renderCart() {
-            // clear existing dynamic rows
-            cartTableBody.innerHTML = '';
-            if (!clientCart.length) {
-                const tr = document.createElement('tr');
-                tr.id = 'emptyRow';
-                tr.innerHTML = '<td colspan="6" class="muted">No books added</td>';
-                cartTableBody.appendChild(tr);
-                updateHidden();
-                return;
-            }
-
-            clientCart.forEach((item, idx) => {
-                const tr = document.createElement('tr');
-                tr.setAttribute('data-index', idx);
-                tr.innerHTML = [
-                    `<td>${idx+1}</td>`,
-                    `<td class="cell-bookId">${escapeHtml(item.bookId || '')}</td>`,
-                    `<td class="cell-title">${escapeHtml(item.title || '')}</td>`,
-                    `<td class="cell-author">${escapeHtml(item.author || '')}</td>`,
-                    `<td class="cell-condition">${escapeHtml(item.condition || 'Good')}</td>`,
-                    `<td><button type="button" class="retro-btn btn--danger removeBtn">Remove</button></td>`
-                ].join('');
-                cartTableBody.appendChild(tr);
-            });
-            updateHidden();
-        }
-
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        if (addBookBtn) {
-            addBookBtn.addEventListener('click', function(){
-                const bookId = bookIdEl.value.trim();
-                const title = bookTitleEl.value.trim();
-                const author = bookAuthorEl.value.trim();
-                const condition = bookConditionEl.value;
-
-                if (!bookId) {
-                    bookIdEl.focus();
-                    return;
-                }
-
-                clientCart.push({ bookId, title, author, condition });
-                bookIdEl.value = '';
-                bookTitleEl.value = '';
-                bookAuthorEl.value = '';
-                bookConditionEl.value = 'Good';
-                renderCart();
-            });
-        }
-
-        // delegate remove button clicks
-        cartTableBody.addEventListener('click', function(e){
-            if (e.target && e.target.matches('.removeBtn')) {
-                const tr = e.target.closest('tr');
-                const idx = Number(tr.getAttribute('data-index'));
-                if (!Number.isNaN(idx)) {
-                    clientCart.splice(idx, 1);
-                    renderCart();
-                }
-            }
-        });
-
-        // on initial load, render once to ensure hidden input sync
-        renderCart();
-
-        // ensure hidden input updated before submit (extra safety)
-        const receiveForm = document.getElementById('receiveForm');
-        if (receiveForm) {
-            receiveForm.addEventListener('submit', function(){
-                updateHidden();
-            });
-        }
-    })();
-// ...existing code...
-
-// === Dashboard Stats Fetch ===
+// === Dashboard Stats ===
 const fetchStats = async () => {
   try {
     const response = await fetch("/api/stats");
@@ -349,27 +275,22 @@ const fetchStats = async () => {
     console.error("Error fetching dashboard stats:", error);
   }
 };
-
 fetchStats();
 
+// === Dashboard Charts ===
 document.addEventListener("DOMContentLoaded", () => {
-  // Get embedded data from EJS
   const dataTag = document.getElementById("dashboard-data");
-  if (!dataTag) return; // Only run this on dashboard page
-
+  if (!dataTag) return;
   const { trends = [], genres = [] } = JSON.parse(dataTag.textContent);
 
-  // Check Chart.js availability
   if (typeof Chart === "undefined") {
     console.error("Chart.js not loaded");
     return;
   }
 
-  // Borrowing Trends (Bar Chart)
   const borrowCanvas = document.getElementById("borrowTrendsChart");
   if (borrowCanvas) {
-    const borrowCtx = borrowCanvas.getContext("2d");
-    new Chart(borrowCtx, {
+    new Chart(borrowCanvas.getContext("2d"), {
       type: "bar",
       data: {
         labels: trends.map((t) => t.label),
@@ -389,11 +310,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Genre Distribution (Pie Chart)
   const genreCanvas = document.getElementById("genreChart");
   if (genreCanvas) {
-    const genreCtx = genreCanvas.getContext("2d");
-    new Chart(genreCtx, {
+    new Chart(genreCanvas.getContext("2d"), {
       type: "pie",
       data: {
         labels: genres.map((g) => g.genre),
@@ -416,10 +335,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
-
-// === Event Listeners ===
-if (searchBar) searchBar.addEventListener("input", applyFilters);
-if (filterStatus) filterStatus.addEventListener("change", applyFilters);
-if (sortBy) sortBy.addEventListener("change", applyFilters);
-if (filterMembership) filterMembership.addEventListener("change", applyFilters);

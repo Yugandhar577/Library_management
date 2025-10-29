@@ -6,7 +6,7 @@ const path = require("path");
 const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
 const bodyParser = require("body-parser");
-// const MongoStore = require("connect-mongo");
+const MongoStore = require("connect-mongo");
 const wrapAsync = require('./utils/wrapAsync.js');
 const error = require('./utils/error.js');
 const User = require("./models/user.js");
@@ -23,7 +23,7 @@ main().then(() => {
 });
 
 async function main() {
-    await mongoose.connect('mongodb://localhost:27017/LibraryDB');
+  await mongoose.connect('mongodb://localhost:27017/LibraryDB');
 }
 
 // EJS setup
@@ -43,9 +43,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 const validateBook = (req, res, next) => {
-  console.log("Validating book:", req.body.book);
-  const { error } = bookSchema.validate(req.body.book);
-  if (error) {
+  const { Error } = bookSchema.validate(req.body);
+  if (Error) {
     const msg = Error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
   }
@@ -53,8 +52,8 @@ const validateBook = (req, res, next) => {
 };
 
 const validateTransaction = (req, res, next) => {
-  const { error } = transactionSchema.validate(req.body);
-  if (error) {
+  const { Error } = transactionSchema.validate(req.body);
+  if (Error) {
     const msg = Error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
   }
@@ -62,8 +61,8 @@ const validateTransaction = (req, res, next) => {
 };
 
 const validateUser = (req, res, next) => {
-  const { error } = userSchema.validate(req.body);
-  if (error) {
+  const { Error } = userSchema.validate(req.body);
+  if (Error) {
     const msg = Error.details.map((el) => el.message).join(",");
     throw new error(msg, 400);
   }
@@ -73,13 +72,11 @@ const validateUser = (req, res, next) => {
 // Routes
 app.get("/", async (req, res) => {
   try {
-    // 1️⃣ Fetch latest transactions (join-like behavior using manual lookups)
     const transactions = await Transaction.find()
       .sort({ issueDate: -1 })
       .limit(10)
       .lean();
 
-    // Attach readable book + user names
     for (let t of transactions) {
       const book = await Book.findById(t.bookId).lean();
       const user = await User.findOne({ _id: t.userId }).lean();
@@ -89,7 +86,6 @@ app.get("/", async (req, res) => {
       t.status = t.status || "Borrowed";
     }
 
-    // 2️⃣ Prepare simple chart/trend data
     const genres = await Book.aggregate([
       { $group: { _id: "$genre", count: { $sum: 1 } } },
       { $project: { genre: "$_id", count: 1, _id: 0 } },
@@ -103,13 +99,11 @@ app.get("/", async (req, res) => {
       { $limit: 5 },
     ]);
 
-    // Add book titles to topBooks
     for (let tb of topBooks) {
       const book = await Book.findById(tb._id).lean();
       tb.title = book ? book.title : "Unknown";
     }
 
-    // 3️⃣ Prepare recent activities
     const activities = transactions.slice(0, 5).map((t) => ({
       member: t.memberName,
       type: t.status === "Returned" ? "returned" : "borrowed",
@@ -134,14 +128,11 @@ app.get("/", async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    // Map MongoDB days (1=Sun, 7=Sat) → readable labels
     const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const trends = Array.from({ length: 7 }, (_, i) => {
       const found = trendAgg.find((t) => t._id === i + 1);
       return { label: dayLabels[i], count: found ? found.count : 0 };
     });
-
-    // 4️⃣ Render home.ejs with real DB data
     res.render("home", {
       transactions,
       trends, 
@@ -154,10 +145,6 @@ app.get("/", async (req, res) => {
     res.status(500).send("Error loading dashboard");
   }
 });
-
-
-
-
 
 // ------------------- User Routes -------------------
 // List all users (members)
@@ -190,7 +177,7 @@ app.get(
   "/users/:id/editmember",
   wrapAsync(async (req, res) => {
     const user = await User.findById(req.params.id);
-    if (!user) throw new Error("User not found", 404);
+    if (!user) throw new error("User not found", 404);
     res.render("users/editmember", { title: "Edit Member", user });
   })
 );
@@ -200,12 +187,8 @@ app.put(
   "/users/:id",
   validateUser,
   wrapAsync(async (req, res) => {
-    console.log(req); 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body.user }
-    );
-    if (!updatedUser) throw new Error("User not found", 404);
+    const updatedUser = await User.findByIdAndUpdate(req.params.id,{ ...req.body.user });
+    if (!updatedUser) throw new error("User not found", 404);
     res.redirect(`/users/${updatedUser._id}`);
   })
 );
@@ -272,10 +255,7 @@ app.put(
   "/books/:id",
   validateBook,
   wrapAsync(async (req, res) => {
-    const updatedBook = await Book.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body.Book },
-    );
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id,{ ...req.body.book });
     if (!updatedBook) throw new error("Book not found", 404);
     res.redirect(`/books/${updatedBook._id}`);
   })
@@ -376,29 +356,21 @@ app.get(
 
 // ------------------- Action Routes (issue / receive) -------------------
 app.get("/actions/issue", (req, res) => {
-  // render page to start the issue flow (select member, book, etc.)
   res.render("actions/issue", { title: "Issue Book" });
 });
 
 app.get("/actions/receive", (req, res) => {
-  // render page to start the receive/return flow
   res.render("actions/receive", { title: "Receive Book" });
 });
 app.post(
   "/actions/issue",
   wrapAsync(async (req, res) => {
     const { memberId, issueDate, dueDate, books } = req.body;
-
-    // 1️⃣ Parse books array safely
     const bookList = typeof books === "string" ? JSON.parse(books) : books;
-
-    // 2️⃣ Find the member
     const user = await User.findOne({ memberId });
     if (!user) {
       return res.status(400).send("Member not found!");
     }
-
-    // 3️⃣ Validate all books exist and are available
     const validBooks = [];
     for (const item of bookList) {
       const book = await Book.findById(item.bookId);
@@ -410,12 +382,9 @@ app.post(
       }
       validBooks.push(book);
     }
-
-    // 4️⃣ Process each book — create transaction + update DBs
     const createdTxns = [];
 
     for (const book of validBooks) {
-      // a) Create a transaction
       const txn = new Transaction({
         bookId: book._id,
         userId: user._id,
@@ -427,11 +396,9 @@ app.post(
       await txn.save();
       createdTxns.push(txn);
 
-      // b) Update book stock
       book.availableCopies = Math.max(0, book.availableCopies - 1);
       await book.save();
 
-      // c) Update user stats
       user.borrowedBooks += 1;
     }
 
@@ -445,8 +412,6 @@ app.post(
 app.post("/actions/receive", async (req, res) => {
   try {
     const { memberId, memberName, receiveDate, remarks, books } = req.body;
-
-    // Parse books (comes from hidden input as JSON)
     const parsedBooks = typeof books === "string" ? JSON.parse(books) : books;
 
     if (
@@ -456,16 +421,12 @@ app.post("/actions/receive", async (req, res) => {
     ) {
       return res.status(400).send("No books specified for return");
     }
-
-    // Update each book and corresponding transaction
     for (const bookItem of parsedBooks) {
       const { bookId } = bookItem;
-
-      // 1️⃣ Update Transaction: mark as returned
       const txn = await Transaction.findOne({
         bookId: bookId,
         userId: memberId,
-        returnDate: null, // still active
+        returnDate: null, 
       });
 
       if (txn) {
@@ -473,7 +434,6 @@ app.post("/actions/receive", async (req, res) => {
         await txn.save();
       }
 
-      // 2️⃣ Update Book availability
       const book = await Book.findById(bookId);
       if (book) {
         book.availableCopies = Math.min(
@@ -483,7 +443,6 @@ app.post("/actions/receive", async (req, res) => {
         await book.save();
       }
 
-      // 3️⃣ Update User borrowed count
       const user = await User.findById(memberId);
       if (user) {
         user.borrowedBooks = Math.max(0, user.borrowedBooks - 1);
@@ -491,11 +450,10 @@ app.post("/actions/receive", async (req, res) => {
       }
     }
 
-    // Optionally log or redirect
-    console.log(`✅ Books received successfully from member ${memberId}`);
+    console.log(`Books received successfully from member ${memberId}`);
     res.redirect(`/transactions/${txn._id}`);
   } catch (err) {
-    console.error("❌ Error receiving books:", err);
+    console.error("Error receiving books:", err);
     res.status(500).send("Error processing returns");
   }
 });
@@ -511,31 +469,26 @@ app.put(
       return res.status(404).send("Transaction not found");
     }
 
-    // If it's already returned, skip update
     if (transaction.status === "Returned") {
       return res.redirect(`/transactions/${id}`);
     }
 
-    // Update status and return date
     transaction.status = "Returned";
     transaction.returnDate = new Date();
     await transaction.save();
 
-    // Update related Book (increment availableCopies)
     const book = await Book.findById(transaction.bookId);
     if (book) {
       book.availableCopies = (book.availableCopies || 0) + 1;
       await book.save();
     }
 
-    // Update related User (decrement borrowedBooks)
     const user = await User.findById(transaction.userId);
     if (user && user.borrowedBooks > 0) {
       user.borrowedBooks -= 1;
       await user.save();
     }
 
-    // ✅ Redirect back to this transaction's show page
     res.redirect(`/transactions/${transaction._id}`);
   })
 );
@@ -546,14 +499,12 @@ app.post(
   wrapAsync(async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) throw new error("Book not found", 404);
-
-    // Create a new transaction
     const newTransaction = new Transaction({
       book: book._id,
       user: req.user._id,
       status: "issued",
       issueDate: new Date(),
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
     await newTransaction.save();
 
@@ -566,7 +517,6 @@ app.post(
   wrapAsync(async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) throw new error("Book not found", 404);
-    // Find the transaction and mark it as returned
     const transaction = await Transaction.findOneAndUpdate(
       { book: book._id, user: req.user._id, status: "issued" },
       { status: "returned", returnDate: new Date() },

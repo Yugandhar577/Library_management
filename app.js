@@ -11,7 +11,6 @@ const wrapAsync = require('./utils/wrapAsync.js');
 const error = require('./utils/error.js');
 const User = require("./models/user.js");
 const Book = require("./models/book.js");
-const issue = require("./models/issue.js");
 const fine = require("./models/fine.js");
 const Transaction = require("./models/transaction.js");
 const { bookSchema, userSchema, transactionSchema } = require("./models/schema.js");
@@ -72,88 +71,91 @@ const validateUser = (req, res, next) => {
 };
 
 // Routes
-app.get("/", (req, res) => {
-  // Dummy data for now (can be replaced with DB fetch later)
-const transactions = [
-  {
-    memberName: "John Smith",
-    bookTitle: "The Great Gatsby",
-    status: "Returned",
-    date: "Oct 14",
-  },
-  {
-    memberName: "Emily Johnson",
-    bookTitle: "To Kill a Mockingbird",
-    status: "Issued",
-    date: "Oct 13",
-  },
-  {
-    memberName: "Michael Brown",
-    bookTitle: "1984",
-    status: "Overdue",
-    date: "Oct 12",
-  },
-  {
-    memberName: "John Smith",
-    bookTitle: "The Great Gatsby",
-    status: "Returned",
-    date: "Oct 04",
-  },
-  {
-    memberName: "Emily Johnson",
-    bookTitle: "To Kill a Mockingbird",
-    status: "Issued",
-    date: "Oct 23",
-  },
-  {
-    memberName: "Michael Brown",
-    bookTitle: "1984",
-    status: "Overdue",
-    date: "Oct 22",
-  },
-  {
-    memberName: "John Smith",
-    bookTitle: "The Great Gatsby",
-    status: "Returned",
-    date: "Oct 24",
-  },
+app.get("/", async (req, res) => {
+  try {
+    // 1️⃣ Fetch latest transactions (join-like behavior using manual lookups)
+    const transactions = await Transaction.find()
+      .sort({ issueDate: -1 })
+      .limit(10)
+      .lean();
 
-];
+    // Attach readable book + user names
+    for (let t of transactions) {
+      const book = await Book.findById(t.bookId).lean();
+      const user = await User.findOne({ _id: t.userId }).lean();
+      t.bookTitle = book ? book.title : "Unknown Book";
+      t.memberName = user ? user.name : "Unknown User";
+      t.date = t.issueDate ? t.issueDate.toISOString().slice(5, 10) : "";
+      t.status = t.status || "Borrowed";
+    }
 
-const trends = [
-  { label: 'Mon', count: 12 },
-  { label: 'Tue', count: 9 },
-  { label: 'Wed', count: 14 },
-  { label: 'Thu', count: 7 },
-  { label: 'Fri', count: 10 },
-];
+    // 2️⃣ Prepare simple chart/trend data
+    const genres = await Book.aggregate([
+      { $group: { _id: "$genre", count: { $sum: 1 } } },
+      { $project: { genre: "$_id", count: 1, _id: 0 } },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ]);
 
-const genres = [
-  { genre: 'Fiction', count: 40 },
-  { genre: 'Tech', count: 25 },
-  { genre: 'Science', count: 15 },
-  { genre: 'History', count: 10 },
-];
+    const topBooks = await Transaction.aggregate([
+      { $group: { _id: "$bookId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ]);
 
-const topBooks = [
-  { title: '1984', count: 34 },
-  { title: 'The Great Gatsby', count: 29 },
-];
+    // Add book titles to topBooks
+    for (let tb of topBooks) {
+      const book = await Book.findById(tb._id).lean();
+      tb.title = book ? book.title : "Unknown";
+    }
 
-const activities = [
-  { member: 'John', type: 'borrowed', book: 'Inferno' },
-  { member: 'Clara', type: 'returned', book: 'Dune' },
-];
+    // 3️⃣ Prepare recent activities
+    const activities = transactions.slice(0, 5).map((t) => ({
+      member: t.memberName,
+      type: t.status === "Returned" ? "returned" : "borrowed",
+      book: t.bookTitle,
+    }));
 
-// Render your home/dashboard EJS and pass the data
-res.render("home", {
-  transactions,
-  trends,
-  genres,
-  topBooks,
-  activities,
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - 6); // Last 7 days
+
+    const trendAgg = await Transaction.aggregate([
+      {
+        $match: {
+          issueDate: { $gte: startOfWeek },
+        },
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: "$issueDate" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Map MongoDB days (1=Sun, 7=Sat) → readable labels
+    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const trends = Array.from({ length: 7 }, (_, i) => {
+      const found = trendAgg.find((t) => t._id === i + 1);
+      return { label: dayLabels[i], count: found ? found.count : 0 };
+    });
+
+    // 4️⃣ Render home.ejs with real DB data
+    res.render("home", {
+      transactions,
+      trends, 
+      genres,
+      topBooks,
+      activities,
+    });
+  } catch (err) {
+    console.error("Error loading dashboard:", err);
+    res.status(500).send("Error loading dashboard");
+  }
 });
-});
+
+
 
 
 
@@ -188,7 +190,7 @@ app.get(
   "/users/:id/editmember",
   wrapAsync(async (req, res) => {
     const user = await User.findById(req.params.id);
-    if (!user) throw new error("User not found", 404);
+    if (!user) throw new Error("User not found", 404);
     res.render("users/editmember", { title: "Edit Member", user });
   })
 );
@@ -198,12 +200,12 @@ app.put(
   "/users/:id",
   validateUser,
   wrapAsync(async (req, res) => {
+    console.log(req); 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      { ...req.body.User },
-      { new: true }
+      { ...req.body.user }
     );
-    if (!updatedUser) throw new error("User not found", 404);
+    if (!updatedUser) throw new Error("User not found", 404);
     res.redirect(`/users/${updatedUser._id}`);
   })
 );

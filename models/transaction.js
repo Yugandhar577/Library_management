@@ -12,7 +12,7 @@ const transactionSchema = new Schema({
     },
     
     userId: { 
-        type: Number, 
+        type: String, 
         required: true 
     },
     

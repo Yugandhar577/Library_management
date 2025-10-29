@@ -259,6 +259,136 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
   renderCart();
 })();
 
+(function receiveBook() {
+  const $ = (id) => document.getElementById(id);
+  const receiveForm = $("receiveForm");
+  if (!receiveForm) return; // Exit if not on this page
+
+  const bookIdInput = $("bookId");
+  const bookTitleInput = $("bookTitle");
+  const bookAuthorInput = $("bookAuthor");
+  const bookConditionSelect = $("bookCondition");
+  const addBookBtn = $("addBookBtn");
+  const cartTableBody = document.querySelector("#cartTable tbody");
+  const booksInput = $("booksInput");
+  const emptyRowId = "emptyRow";
+
+  if (!cartTableBody || !booksInput) return;
+
+  let cart = [];
+
+  // 🧩 Load existing cart items (if EJS rendered any)
+  Array.from(cartTableBody.querySelectorAll("tr")).forEach((row) => {
+    if (row.id === emptyRowId) return;
+    const idCell = row.querySelector(".cell-bookId");
+    const titleCell = row.querySelector(".cell-title");
+    const authorCell = row.querySelector(".cell-author");
+    const conditionCell = row.querySelector(".cell-condition");
+    if (idCell && titleCell) {
+      cart.push({
+        bookId: idCell.textContent.trim(),
+        title: titleCell.textContent.trim(),
+        author: authorCell ? authorCell.textContent.trim() : "",
+        condition: conditionCell ? conditionCell.textContent.trim() : "Good",
+      });
+    }
+  });
+
+  // 🔄 Update hidden input whenever cart changes
+  const refreshHiddenInput = () => {
+    booksInput.value = JSON.stringify(cart);
+  };
+
+  // 🧱 Render cart in table
+  const renderCart = () => {
+    cartTableBody.innerHTML = "";
+    if (cart.length === 0) {
+      const tr = document.createElement("tr");
+      tr.id = emptyRowId;
+      tr.innerHTML = `<td colspan="6" class="muted">No books added</td>`;
+      cartTableBody.appendChild(tr);
+    } else {
+      cart.forEach((item, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td class="cell-bookId">${escapeHtml(item.bookId)}</td>
+          <td class="cell-title">${escapeHtml(item.title)}</td>
+          <td class="cell-author">${escapeHtml(item.author)}</td>
+          <td class="cell-condition">${escapeHtml(item.condition)}</td>
+          <td><button type="button" class="retro-btn btn--danger removeBtn">Remove</button></td>
+        `;
+        cartTableBody.appendChild(tr);
+      });
+    }
+    refreshHiddenInput();
+  };
+
+  // 🧼 Prevent XSS via safe text escaping
+  const escapeHtml = (str) =>
+    String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  // ➕ Add book to the cart
+  if (addBookBtn) {
+    addBookBtn.addEventListener("click", () => {
+      const bookId = bookIdInput.value.trim();
+      const title = bookTitleInput.value.trim();
+      const author = bookAuthorInput.value.trim();
+      const condition = bookConditionSelect.value;
+
+      if (!bookId || !title) {
+        alert("Please provide at least Book ID and Title.");
+        return;
+      }
+
+      // Prevent duplicates (same book ID)
+      if (cart.some((b) => b.bookId === bookId)) {
+        alert("This book is already added to the receive list.");
+        return;
+      }
+
+      cart.push({ bookId, title, author, condition });
+      renderCart();
+
+      // Reset fields
+      bookIdInput.value = "";
+      bookTitleInput.value = "";
+      bookAuthorInput.value = "";
+      bookConditionSelect.value = "Good";
+      bookIdInput.focus();
+    });
+  }
+
+  // 🗑️ Remove book from cart
+  cartTableBody.addEventListener("click", (e) => {
+    if (!e.target.matches(".removeBtn")) return;
+    const tr = e.target.closest("tr");
+    const idx = Array.from(cartTableBody.querySelectorAll("tr")).indexOf(tr);
+    if (idx >= 0 && idx < cart.length) {
+      cart.splice(idx, 1);
+      renderCart();
+    }
+  });
+
+  // ✅ On form submit: ensure at least one book
+  receiveForm.addEventListener("submit", (e) => {
+    if (cart.length === 0) {
+      e.preventDefault();
+      alert("Please add at least one book to receive.");
+      return;
+    }
+    refreshHiddenInput();
+  });
+
+  // Initial render (if preloaded cart exists)
+  renderCart();
+})();
+
 // === Dashboard Stats ===
 const fetchStats = async () => {
   try {

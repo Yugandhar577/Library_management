@@ -4,43 +4,47 @@ const Schema = mongoose.Schema;
 // A constant for the default borrowing period (e.g., 21 days)
 const BORROWING_DAYS = 21; 
 
-const transactionSchema = new Schema({
+const transactionSchema = new Schema(
+  {
     // Fields to match the simple data types you're using
-    bookId: { 
-        type: String, 
-        required: true 
+    bookId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Book",
+      required: true,
     },
-    
-    userId: { 
-        type: String, 
-        required: true 
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    
-    issueDate: { 
-        type: Date, 
-        required: true, 
-        default: Date.now 
+
+    issueDate: {
+      type: Date,
+      required: true,
+      default: Date.now,
     },
-    
-    returnDate: { 
-        type: Date, 
-        default: null 
+
+    returnDate: {
+      type: Date,
+      default: null,
     },
 
     // NEW FIELD: Store the due date directly in the database
     dueDate: {
-        type: Date,
-        required: true,
-        // Calculate the due date 21 days after the issue date before saving
-        default: () => new Date(Date.now() + BORROWING_DAYS * 24 * 60 * 60 * 1000)
-    }
-    
-}, { 
+      type: Date,
+      required: true,
+      // Calculate the due date 21 days after the issue date before saving
+      default: () =>
+        new Date(Date.now() + BORROWING_DAYS * 24 * 60 * 60 * 1000),
+    },
+  },
+  {
     timestamps: true,
     // Configuration to include virtuals when converting to JSON (e.g., in Express response)
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
+    toObject: { virtuals: true },
+  }
+);
 
 // VIRTUAL PROPERTY 1: Calculates the display status
 transactionSchema.virtual('status').get(function() {

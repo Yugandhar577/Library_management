@@ -72,20 +72,46 @@ const validateUser = (req, res, next) => {
 // Routes
 app.get("/", async (req, res) => {
   try {
-    const transactions = await Transaction.find()
+    // Fetch transactions as Mongoose documents (so virtuals run)
+    const txns = await Transaction.find()
       .sort({ issueDate: -1 })
       .limit(10)
-      .lean();
+      .populate("bookId", "title") // only need title
+      .populate("userId", "name") // only need name
+      .exec();
 
-    for (let t of transactions) {
-      const book = await Book.findById(t.bookId).lean();
-      const user = await User.findOne({ _id: t.userId }).lean();
-      t.bookTitle = book ? book.title : "Unknown Book";
-      t.memberName = user ? user.name : "Unknown User";
-      t.date = t.issueDate ? t.issueDate.toISOString().slice(5, 10) : "";
-      t.status = t.status || "Borrowed";
-    }
+    // Map to plain objects prepared for the view
+    const transactions = txns.map((txn) => {
+      // txn is a Mongoose document so virtuals (txn.status) are available
+      const bookTitle = txn.bookId
+        ? txn.bookId.title || "Unknown Book"
+        : "Unknown Book";
+      const memberName = txn.userId
+        ? txn.userId.name || "Unknown User"
+        : "Unknown User";
 
+      // If you prefer to compute status here instead of relying on virtual:
+      const now = new Date();
+      const computedStatus = txn.returnDate
+        ? "Returned"
+        : txn.dueDate && txn.dueDate < now
+        ? "Overdue"
+        : "Borrowed";
+
+      return {
+        _id: txn._id,
+        bookTitle,
+        memberName,
+        date: txn.issueDate ? txn.issueDate.toISOString().slice(5, 10) : "",
+        // prefer the schema virtual, fallback to computedStatus
+        status: txn.status || computedStatus,
+        issueDate: txn.issueDate,
+        dueDate: txn.dueDate,
+        returnDate: txn.returnDate,
+      };
+    });
+
+    // genres & topBooks (unchanged)
     const genres = await Book.aggregate([
       { $group: { _id: "$genre", count: { $sum: 1 } } },
       { $project: { genre: "$_id", count: 1, _id: 0 } },
@@ -93,15 +119,17 @@ app.get("/", async (req, res) => {
       { $limit: 5 },
     ]);
 
-    const topBooks = await Transaction.aggregate([
+    const topBooksAgg = await Transaction.aggregate([
       { $group: { _id: "$bookId", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 },
     ]);
 
-    for (let tb of topBooks) {
+    // Resolve titles for topBooks (keep as before)
+    const topBooks = [];
+    for (const tb of topBooksAgg) {
       const book = await Book.findById(tb._id).lean();
-      tb.title = book ? book.title : "Unknown";
+      topBooks.push({ title: book ? book.title : "Unknown", count: tb.count });
     }
 
     const activities = transactions.slice(0, 5).map((t) => ({
@@ -110,21 +138,13 @@ app.get("/", async (req, res) => {
       book: t.bookTitle,
     }));
 
+    // Build trends for last 7 days
     const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - 6); // Last 7 days
+    startOfWeek.setDate(startOfWeek.getDate() - 6);
 
     const trendAgg = await Transaction.aggregate([
-      {
-        $match: {
-          issueDate: { $gte: startOfWeek },
-        },
-      },
-      {
-        $group: {
-          _id: { $dayOfWeek: "$issueDate" },
-          count: { $sum: 1 },
-        },
-      },
+      { $match: { issueDate: { $gte: startOfWeek } } },
+      { $group: { _id: { $dayOfWeek: "$issueDate" }, count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]);
 
@@ -133,9 +153,10 @@ app.get("/", async (req, res) => {
       const found = trendAgg.find((t) => t._id === i + 1);
       return { label: dayLabels[i], count: found ? found.count : 0 };
     });
+
     res.render("home", {
       transactions,
-      trends, 
+      trends,
       genres,
       topBooks,
       activities,
@@ -146,8 +167,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-// ------------------- User Routes -------------------
-// List all users (members)
+//--------------------- User Routes -------------------
 app.get(
   "/allmembers",
   wrapAsync(async (req, res) => {
@@ -155,7 +175,6 @@ app.get(
     res.render("users/allMembers", { title: "All Members", allMembers });
   })
 );
-
 // New User Form
 app.get("/users/addmember", (req, res) => {
   res.render("users/addmember", { title: "Add New Member" });
@@ -367,12 +386,16 @@ app.post(
   wrapAsync(async (req, res) => {
     const { memberId, issueDate, dueDate, books } = req.body;
     const bookList = typeof books === "string" ? JSON.parse(books) : books;
+
+    // Find member
     const user = await User.findOne({ memberId });
     if (!user) {
       return res.status(400).send("Member not found!");
     }
+
     const validBooks = [];
     for (const item of bookList) {
+      // 🟢 Find by _id (since there’s no bookId field)
       const book = await Book.findById(item.bookId);
       if (!book) {
         return res.status(400).send(`Book not found: ${item.bookId}`);
@@ -382,12 +405,13 @@ app.post(
       }
       validBooks.push(book);
     }
+
     const createdTxns = [];
 
     for (const book of validBooks) {
       const txn = new Transaction({
-        bookId: book._id,
-        userId: user._id,
+        bookId: book._id, // store ObjectId reference
+        userId: user._id, // store ObjectId reference
         issueDate: issueDate ? new Date(issueDate) : new Date(),
         dueDate: dueDate
           ? new Date(dueDate)
@@ -396,14 +420,17 @@ app.post(
       await txn.save();
       createdTxns.push(txn);
 
+      // update book availability
       book.availableCopies = Math.max(0, book.availableCopies - 1);
       await book.save();
 
+      // update user borrowed count
       user.borrowedBooks += 1;
     }
 
     await user.save();
 
+    // redirect to latest transaction’s show page
     const latestTxn = createdTxns[createdTxns.length - 1];
     res.redirect(`/transactions/${latestTxn._id}`);
   })
@@ -411,7 +438,7 @@ app.post(
 
 app.post("/actions/receive", async (req, res) => {
   try {
-    const { memberId, memberName, receiveDate, remarks, books } = req.body;
+    const { memberId, receiveDate, books } = req.body;
     const parsedBooks = typeof books === "string" ? JSON.parse(books) : books;
 
     if (
@@ -421,42 +448,59 @@ app.post("/actions/receive", async (req, res) => {
     ) {
       return res.status(400).send("No books specified for return");
     }
-    for (const bookItem of parsedBooks) {
-      const { bookId } = bookItem;
+
+    // find the user
+    const user = await User.findOne({ memberId });
+    if (!user) return res.status(400).send("Member not found!");
+
+    let lastTxn = null;
+
+    for (const { bookId } of parsedBooks) {
+      const book = await Book.findById(bookId);
+      if (!book) {
+        console.warn(`Book not found: ${bookId}`);
+        continue;
+      }
+
+      // find the active (unreturned) transaction
       const txn = await Transaction.findOne({
-        bookId: bookId,
-        userId: memberId,
-        returnDate: null, 
+        bookId: book._id,
+        userId: user._id,
+        returnDate: null,
       });
 
       if (txn) {
         txn.returnDate = receiveDate ? new Date(receiveDate) : new Date();
         await txn.save();
+        lastTxn = txn;
       }
 
-      const book = await Book.findById(bookId);
-      if (book) {
-        book.availableCopies = Math.min(
-          book.totalCopies,
-          book.availableCopies + 1
-        );
-        await book.save();
-      }
+      // increment availability
+      book.availableCopies = Math.min(
+        book.totalCopies,
+        book.availableCopies + 1
+      );
+      await book.save();
 
-      const user = await User.findById(memberId);
-      if (user) {
-        user.borrowedBooks = Math.max(0, user.borrowedBooks - 1);
-        await user.save();
-      }
+      // update user borrowed count
+      user.borrowedBooks = Math.max(0, user.borrowedBooks - 1);
     }
 
+    await user.save();
+
     console.log(`Books received successfully from member ${memberId}`);
-    res.redirect(`/transactions/${txn._id}`);
+
+    if (lastTxn) {
+      res.redirect(`/transactions/${lastTxn._id}`);
+    } else {
+      res.redirect("/allTransactions");
+    }
   } catch (err) {
     console.error("Error receiving books:", err);
     res.status(500).send("Error processing returns");
   }
 });
+
 
 app.put(
   "/transactions/:id/return",

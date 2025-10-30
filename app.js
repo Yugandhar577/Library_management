@@ -72,17 +72,13 @@ const validateUser = (req, res, next) => {
 // Routes
 app.get("/", async (req, res) => {
   try {
-    // Fetch transactions as Mongoose documents (so virtuals run)
     const txns = await Transaction.find()
       .sort({ issueDate: -1 })
       .limit(10)
-      .populate("bookId", "title") // only need title
-      .populate("userId", "name") // only need name
+      .populate("bookId", "title") 
+      .populate("userId", "name")
       .exec();
-
-    // Map to plain objects prepared for the view
     const transactions = txns.map((txn) => {
-      // txn is a Mongoose document so virtuals (txn.status) are available
       const bookTitle = txn.bookId
         ? txn.bookId.title || "Unknown Book"
         : "Unknown Book";
@@ -90,7 +86,6 @@ app.get("/", async (req, res) => {
         ? txn.userId.name || "Unknown User"
         : "Unknown User";
 
-      // If you prefer to compute status here instead of relying on virtual:
       const now = new Date();
       const computedStatus = txn.returnDate
         ? "Returned"
@@ -103,7 +98,6 @@ app.get("/", async (req, res) => {
         bookTitle,
         memberName,
         date: txn.issueDate ? txn.issueDate.toISOString().slice(5, 10) : "",
-        // prefer the schema virtual, fallback to computedStatus
         status: txn.status || computedStatus,
         issueDate: txn.issueDate,
         dueDate: txn.dueDate,

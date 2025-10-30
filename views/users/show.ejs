@@ -26,6 +26,15 @@
             <%= user.overdueCount || 0 %>
           </span>
         </p>
+
+<h3>Fines</h3>
+  <% fines.forEach(f => { %>
+    <tr>
+      <td>₹<%= f.amount %></td>
+      <td><%= f.paid ? "Paid" : "Unpaid" %></td>
+      <td><%= f.generatedAt.toISOString().split('T')[0] %></td>
+    </tr>
+  <% }) %>
       </div>
     </div>
 

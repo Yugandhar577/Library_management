@@ -68,7 +68,23 @@
           </div>
         </div>
 
+
+
+
         <!-- Top Borrowed Books -->
+        <div class="retro-window">
+          <div class="window-title">Top Borrowed Books</div>
+          <div class="window-body">
+            <h3>Outstanding Fines: ₹<%= totalFineAmount %></h3>
+            <ul class="retro-list">
+              <% fines.forEach(f => { %>
+                <li><%= f.userId?.name || "Unknown" %> - ₹<%= f.amount %></li>
+              <% }) %>
+            </ul>
+          </div>
+        </div>
+
+
         <div class="retro-window">
           <div class="window-title">Top Borrowed Books</div>
           <div class="window-body">

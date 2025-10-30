@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const fineSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: "User" },
-  issueId: { type: Schema.Types.ObjectId, ref: "Issue" },
+  transactionId: { type: Schema.Types.ObjectId, ref: "Transaction" },
   amount: Number,
   paid: { type: Boolean, default: false },
   generatedAt: { type: Date, default: Date.now }

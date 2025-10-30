@@ -324,11 +324,6 @@ app.get(
   })
 );
 
-// New Transaction Form
-// app.get("/transactions/new", (req, res) => {
-//   res.render("transactions/new", { title: "Add New Transaction" });
-// });
-
 // Create New Transaction
 app.post(
   "/transactions",
@@ -339,31 +334,6 @@ app.post(
     res.redirect("/transactions");
   })
 );
-
-// Edit Transaction Form
-// app.get(
-//   "/transactions/:id/edit",
-//   wrapAsync(async (req, res) => {
-//     const transaction = await Transaction.findById(req.params.id);
-//     if (!transaction) throw new error("Transaction not found", 404);
-//     res.render("transactions/edit", { title: "Edit Transaction", transaction });
-//   })
-// );
-
-// Update Transaction
-// app.put(
-//   "/transactions/:id",
-//   validateTransaction,
-//   wrapAsync(async (req, res) => {
-//     const updatedTransaction = await Transaction.findByIdAndUpdate(
-//       req.params.id,
-//       { ...req.body.Transaction },
-//       { new: true }
-//     );
-//     if (!updatedTransaction) throw new error("Transaction not found", 404);
-//     res.redirect(/transactions/${updatedTransaction._id});
-//   })
-// );
 
 // Delete Transaction
 app.delete(
@@ -468,8 +438,8 @@ app.post(
 
     for (const book of validBooks) {
       const txn = new Transaction({
-        bookId: book._id, // store ObjectId reference
-        userId: user._id, // store ObjectId reference
+        bookId: book._id, 
+        userId: user._id, 
         issueDate: issueDate ? new Date(issueDate) : new Date(),
         dueDate: dueDate
           ? new Date(dueDate)
@@ -485,7 +455,6 @@ app.post(
       // update user borrowed count
       user.borrowedBooks += 1;
     }
-
     await user.save();
 
     // redirect to latest transaction’s show page
@@ -529,7 +498,6 @@ app.post(
         await txn.save();
         lastTxn = txn;
 
-        // ✅ Fine calculation with grace period
         if (txn.dueDate < now) {
           const daysLate = Math.ceil((now - txn.dueDate) / (1000 * 60 * 60 * 24));
           const chargeDays = Math.max(0, daysLate - gracePeriod);
@@ -562,8 +530,6 @@ app.put(
   "/transactions/:id/return",
   wrapAsync(async (req, res) => {
     const { id } = req.params;
-
-    // Find the transaction
     const transaction = await Transaction.findById(id);
     if (!transaction) {
       return res.status(404).send("Transaction not found");

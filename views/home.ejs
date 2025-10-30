@@ -35,7 +35,7 @@
                       <td>
                         <% if (txn.status === 'Returned') { %>
                           <span class="status green"><%= txn.status %></span>
-                        <% } else if (txn.status === 'Issued') { %>
+                        <% } else if (txn.status === 'Borrowed') { %>
                           <span class="status yellow"><%= txn.status %></span>
                         <% } else { %>
                           <span class="status red"><%= txn.status %></span>

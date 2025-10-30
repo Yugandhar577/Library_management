@@ -6,7 +6,6 @@ const path = require("path");
 const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
 const bodyParser = require("body-parser");
-const MongoStore = require("connect-mongo");
 const wrapAsync = require('./utils/wrapAsync.js');
 const error = require('./utils/error.js');
 const User = require("./models/user.js");
@@ -70,32 +69,28 @@ const validateUser = (req, res, next) => {
 };
 
 // Routes
-app.get("/", async (req, res) => {
-  try {
-    const unpaidFines = await fine.find({ paid: false })
+app.get("/",
+  wrapAsync(async (req, res) => {
+    const unpaidFines = await fine
+      .find({ paid: false })
       .populate("userId", "name")
       .lean();
+
     const totalFineAmount = unpaidFines.reduce((sum, f) => sum + f.amount, 0);
 
-    // Fetch transactions as Mongoose documents (so virtuals run)
     const txns = await Transaction.find()
       .sort({ issueDate: -1 })
       .limit(10)
-      .populate("bookId", "title") // only need title
-      .populate("userId", "name") // only need name
+      .populate("bookId", "title")
+      .populate("userId", "name")
       .exec();
 
-    // Map to plain objects prepared for the view
-    const transactions = txns.map((txn) => {
-      // txn is a Mongoose document so virtuals (txn.status) are available
-      const bookTitle = txn.bookId
-        ? txn.bookId.title || "Unknown Book"
-        : "Unknown Book";
-      const memberName = txn.userId
-        ? txn.userId.name || "Unknown User"
-        : "Unknown User";
+    // Convert to view-friendly objects
+      const transactions = txns.map((txn) => {
+        console.log(txn);
+      const bookTitle = txn.bookId?.title || "Unknown Book";
+      const memberName = txn.userId?.name || "Unknown User";
 
-      // If you prefer to compute status here instead of relying on virtual:
       const now = new Date();
       const computedStatus = txn.returnDate
         ? "Returned"
@@ -107,8 +102,9 @@ app.get("/", async (req, res) => {
         _id: txn._id,
         bookTitle,
         memberName,
-        date: txn.issueDate ? txn.issueDate.toISOString().slice(5, 10) : "",
-        // prefer the schema virtual, fallback to computedStatus
+        date: txn.issueDate
+          ? txn.issueDate.toISOString().slice(5, 10)
+          : "",
         status: txn.status || computedStatus,
         issueDate: txn.issueDate,
         dueDate: txn.dueDate,
@@ -116,7 +112,7 @@ app.get("/", async (req, res) => {
       };
     });
 
-    // genres & topBooks (unchanged)
+    // Genres stats
     const genres = await Book.aggregate([
       { $group: { _id: "$genre", count: { $sum: 1 } } },
       { $project: { genre: "$_id", count: 1, _id: 0 } },
@@ -124,26 +120,30 @@ app.get("/", async (req, res) => {
       { $limit: 5 },
     ]);
 
+    // Top books
     const topBooksAgg = await Transaction.aggregate([
       { $group: { _id: "$bookId", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 },
     ]);
 
-    // Resolve titles for topBooks (keep as before)
     const topBooks = [];
     for (const tb of topBooksAgg) {
       const book = await Book.findById(tb._id).lean();
-      topBooks.push({ title: book ? book.title : "Unknown", count: tb.count });
+      topBooks.push({
+        title: book?.title || "Unknown",
+        count: tb.count,
+      });
     }
 
+    // Recent activities for UI widget
     const activities = transactions.slice(0, 5).map((t) => ({
       member: t.memberName,
       type: t.status === "Returned" ? "returned" : "borrowed",
       book: t.bookTitle,
     }));
 
-    // Build trends for last 7 days
+    // Weekly trends
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - 6);
 
@@ -156,7 +156,7 @@ app.get("/", async (req, res) => {
     const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const trends = Array.from({ length: 7 }, (_, i) => {
       const found = trendAgg.find((t) => t._id === i + 1);
-      return { label: dayLabels[i], count: found ? found.count : 0 };
+      return { label: dayLabels[i], count: found?.count || 0 };
     });
 
     res.render("home", {
@@ -168,11 +168,9 @@ app.get("/", async (req, res) => {
       totalFineAmount,
       activities,
     });
-  } catch (err) {
-    console.error("Error loading dashboard:", err);
-    res.status(500).send("Error loading dashboard");
-  }
-});
+  })
+);
+
 
 //--------------------- User Routes -------------------
 app.get(

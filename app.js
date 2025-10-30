@@ -12,6 +12,7 @@ const User = require("./models/user.js");
 const Book = require("./models/book.js");
 const fine = require("./models/fine.js");
 const Transaction = require("./models/transaction.js");
+const Setting = require("./models/setting.js");
 const { bookSchema, userSchema, transactionSchema } = require("./models/schema.js");
 
 // ---------------- MongoDB Connection ----------------
@@ -87,7 +88,6 @@ app.get("/",
 
     // Convert to view-friendly objects
       const transactions = txns.map((txn) => {
-        console.log(txn);
       const bookTitle = txn.bookId?.title || "Unknown Book";
       const memberName = txn.userId?.name || "Unknown User";
 
@@ -385,6 +385,53 @@ app.get(
   })
 );
 
+// ------------------- Settings -------------------
+// GET Settings Page
+app.get("/settings", async (req, res) => {
+  const settings = await Setting.findOne() || {};
+  res.render("settings", { title: "Settings", settings });
+});
+
+// General Settings Save
+app.post("/settings/general", async (req, res) => {
+  const { libraryName, maxBooksPerUser } = req.body;
+
+  await Setting.updateOne(
+    {},
+    { libraryName, maxBooksPerUser: Number(maxBooksPerUser) },
+    { upsert: true }
+  );
+
+  res.redirect("/settings");
+});
+
+// Fine Settings Save
+app.post("/settings/fines", async (req, res) => {
+  const { finePerDay, gracePeriod } = req.body;
+
+  await Setting.updateOne(
+    {},
+    { finePerDay: Number(finePerDay), gracePeriod: Number(gracePeriod) },
+    { upsert: true }
+  );
+
+  res.redirect("/settings");
+});
+
+// System Settings Save
+app.post("/settings/system", async (req, res) => {
+  const { emailNotifications } = req.body;
+
+  await Setting.updateOne(
+    {},
+    { emailNotifications },
+    { upsert: true }
+  );
+
+  res.redirect("/settings");
+});
+
+
 // ------------------- Action Routes (issue / receive) -------------------
 app.get("/actions/issue", (req, res) => {
   res.render("actions/issue", { title: "Issue Book" });
@@ -460,6 +507,10 @@ app.post(
     const user = await User.findOne({ memberId });
     if (!user) return res.status(400).send("Member not found");
 
+    const settings = await Settings.findOne() || {};
+    const fineRate = settings.finePerDay || 5; // default ₹5/day
+    const gracePeriod = settings.gracePeriod || 0;
+
     let lastTxn = null;
 
     for (const item of parsedBooks) {
@@ -478,23 +529,22 @@ app.post(
         await txn.save();
         lastTxn = txn;
 
+        // ✅ Fine calculation with grace period
         if (txn.dueDate < now) {
-          const daysLate = Math.ceil(
-            (now - txn.dueDate) / (1000 * 60 * 60 * 24)
-          );
-          const fineAmount = daysLate * 10; // ₹10 per day (configurable)
-          await fine.create({
-            userId: user._id,
-            transactionId: txn._id,
-            amount: fineAmount,
-          });
-          console.log(`Fine of ₹${fineAmount} created for user ${user._id}`);
+          const daysLate = Math.ceil((now - txn.dueDate) / (1000 * 60 * 60 * 24));
+          const chargeDays = Math.max(0, daysLate - gracePeriod);
+          const fineAmount = chargeDays * fineRate;
+
+          if (fineAmount > 0) {
+            await Fine.create({
+              userId: user._id,
+              transactionId: txn._id,
+              amount: fineAmount,
+            });
+          }
         }
 
-        book.availableCopies = Math.min(
-          book.totalCopies,
-          book.availableCopies + 1
-        );
+        book.availableCopies = Math.min(book.totalCopies, book.availableCopies + 1);
         await book.save();
 
         user.borrowedBooks = Math.max(0, user.borrowedBooks - 1);
@@ -505,6 +555,7 @@ app.post(
     res.redirect(lastTxn ? `/transactions/${lastTxn._id}` : "/allTransactions");
   })
 );
+
 
 
 app.put(
@@ -591,10 +642,6 @@ app.get("/api/stats", wrapAsync(async (req, res) => {
   });
 }));
 
-// ------------------- Settings -------------------
-app.get("/settings", (req, res) => {
-  res.render("settings", { title: "Settings" });
-});
 
 // ------------------- Error Handler -------------------
 app.use((Error, req, res, next) => {

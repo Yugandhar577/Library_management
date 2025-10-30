@@ -72,14 +72,22 @@ const validateUser = (req, res, next) => {
 // Routes
 app.get("/", async (req, res) => {
   try {
+    const unpaidFines = await fine.find({ paid: false })
+      .populate("userId", "name")
+      .lean();
+    const totalFineAmount = unpaidFines.reduce((sum, f) => sum + f.amount, 0);
+
     // Fetch transactions as Mongoose documents (so virtuals run)
     const txns = await Transaction.find()
       .sort({ issueDate: -1 })
       .limit(10)
-      .populate("bookId", "title") 
-      .populate("userId", "name")
+      .populate("bookId", "title") // only need title
+      .populate("userId", "name") // only need name
       .exec();
+
+    // Map to plain objects prepared for the view
     const transactions = txns.map((txn) => {
+      // txn is a Mongoose document so virtuals (txn.status) are available
       const bookTitle = txn.bookId
         ? txn.bookId.title || "Unknown Book"
         : "Unknown Book";
@@ -87,6 +95,7 @@ app.get("/", async (req, res) => {
         ? txn.userId.name || "Unknown User"
         : "Unknown User";
 
+      // If you prefer to compute status here instead of relying on virtual:
       const now = new Date();
       const computedStatus = txn.returnDate
         ? "Returned"
@@ -99,6 +108,7 @@ app.get("/", async (req, res) => {
         bookTitle,
         memberName,
         date: txn.issueDate ? txn.issueDate.toISOString().slice(5, 10) : "",
+        // prefer the schema virtual, fallback to computedStatus
         status: txn.status || computedStatus,
         issueDate: txn.issueDate,
         dueDate: txn.dueDate,
@@ -353,7 +363,7 @@ app.post(
 //       { new: true }
 //     );
 //     if (!updatedTransaction) throw new error("Transaction not found", 404);
-//     res.redirect(`/transactions/${updatedTransaction._id}`);
+//     res.redirect(/transactions/${updatedTransaction._id});
 //   })
 // );
 

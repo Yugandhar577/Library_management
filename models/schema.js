@@ -35,4 +35,7 @@ const transactionSchema = Joi.object({
   issueDate: Joi.date().required(),
   returnDate: Joi.date().required()
 });
+
+// Fine Schema Validation
+
 module.exports = { bookSchema, userSchema, transactionSchema };

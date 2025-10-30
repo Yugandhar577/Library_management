@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 // const books = require('../models/book.js');
 // const initdata = require('./userdata.js');
 // const member = require('../models/user.js');
-const initdata = require('./transactiondata.js');
-const Transaction = require('../models/transaction.js');
+// const initdata = require('./transactiondata.js');
+// const Transaction = require('../models/transaction.js');
+const initdata = require('./fines.js');
+const Fine = require('../models/fine.js');
 main().then(() =>{
     console.log("Connected to MongoDB");
 }).catch(err => {
@@ -27,9 +29,15 @@ async function main(){
 //     console.log("Database initialized");
 // }
 
+// async function initdb() {
+//     await Transaction.deleteMany({});
+//     await Transaction.insertMany(initdata.data);
+//     console.log("Database initialized");
+// }
+
 async function initdb() {
-    await Transaction.deleteMany({});
-    await Transaction.insertMany(initdata.data);
+    await Fine.deleteMany({});
+    await Fine.insertMany(initdata.data);
     console.log("Database initialized");
 }
 

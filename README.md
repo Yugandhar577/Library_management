@@ -21,7 +21,6 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 - **Issue & Return System**
   - Issue books to members with automatic due-date calculation.
   - Return books and auto-calculate fines for overdue returns.
-  - Prevent new issues for members with pending fines.
 
 - **Fine Management**
   - Automatically compute fines based on overdue days.
@@ -31,7 +30,6 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 - **Transaction History**
   - Complete record of all issue/return transactions.
   - Filter by member, book, or date.
-  - Export transaction reports (CSV or PDF).
 
 ---
 
@@ -46,7 +44,6 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 | **Indexing & Query Optimization** | Indexes on book titles and member IDs for faster lookups |
 | **Data Validation** | Mongoose schema validation and backend constraints |
 | **Triggers-like Logic** | Middleware to auto-update book availability or member fines |
-| **Role-based Access (optional)** | Clerk authentication using sessions |
 
 ---
 
@@ -73,14 +70,17 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 **Aggregated MongoDB queries to display:**
 
 - Total books
-- Total issued
-- Overdue books
-- Total fines collected
+- Total Available
+- Members
+- Overdue
 
-**Charts for:**
+**Charts and Tables for:**
 
-- Books per category
-- Monthly issue trends
+- Recent Transactions
+- Borrowing Trends
+- Genre Distribution
+- Recent Fines
 - Top borrowed books
+- Recent Memeber Activity
 
 ---

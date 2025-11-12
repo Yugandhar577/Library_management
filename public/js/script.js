@@ -40,7 +40,7 @@ const applyFilters = () => {
   const sortOption = sortBy ? sortBy.value : null;
   const membershipFilter = filterMembership ? filterMembership.value : "all";
 
-  // --- 📚 Books ---
+  // --- Books ---
   if (isBooksPage) {
     const cards = Array.from(document.querySelectorAll(".book-card"));
     const grid = document.querySelector(".books-grid");
@@ -88,7 +88,7 @@ if (sortOption) {
 }
   }
 
-  // --- 👥 Members ---
+  // --- Members ---
   if (isMembersPage) {
     const cards = Array.from(document.querySelectorAll(".member-card"));
     const grid = document.querySelector(".members-grid");
@@ -110,7 +110,7 @@ if (sortOption) {
     });
   }
 
-  // --- 🔄 Transactions ---
+  // --- Transactions ---
   if (isTransactionsPage) {
     const cards = Array.from(document.querySelectorAll(".transaction-card"));
     const grid = document.querySelector(".transactions-grid");
@@ -277,7 +277,7 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
 
   let cart = [];
 
-  // 🧩 Load existing cart items (if EJS rendered any)
+  // Load existing cart items (if EJS rendered any)
   Array.from(cartTableBody.querySelectorAll("tr")).forEach((row) => {
     if (row.id === emptyRowId) return;
     const idCell = row.querySelector(".cell-bookId");
@@ -294,12 +294,12 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
     }
   });
 
-  // 🔄 Update hidden input whenever cart changes
+  // Update hidden input whenever cart changes
   const refreshHiddenInput = () => {
     booksInput.value = JSON.stringify(cart);
   };
 
-  // 🧱 Render cart in table
+  // Render cart in table
   const renderCart = () => {
     cartTableBody.innerHTML = "";
     if (cart.length === 0) {
@@ -324,7 +324,7 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
     refreshHiddenInput();
   };
 
-  // 🧼 Prevent XSS via safe text escaping
+  // Prevent XSS via safe text escaping
   const escapeHtml = (str) =>
     String(str)
       .replace(/&/g, "&amp;")
@@ -333,7 +333,7 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
-  // ➕ Add book to the cart
+  // Add book to the cart
   if (addBookBtn) {
     addBookBtn.addEventListener("click", () => {
       const bookId = bookIdInput.value.trim();
@@ -364,7 +364,7 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
     });
   }
 
-  // 🗑️ Remove book from cart
+  // Remove book from cart
   cartTableBody.addEventListener("click", (e) => {
     if (!e.target.matches(".removeBtn")) return;
     const tr = e.target.closest("tr");
@@ -375,7 +375,7 @@ if (filterMembership) filterMembership.addEventListener("change", applyFilters);
     }
   });
 
-  // ✅ On form submit: ensure at least one book
+  // On form submit: ensure at least one book
   receiveForm.addEventListener("submit", (e) => {
     if (cart.length === 0) {
       e.preventDefault();

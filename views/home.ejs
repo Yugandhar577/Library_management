@@ -107,7 +107,7 @@
             <ul class="retro-list">
               <% if (activities && activities.length > 0) { %>
                 <% activities.forEach(activity => { %>
-                  <li>👤 <%= activity.member %> 
+                  <li><%= activity.member %> 
                     <% if (activity.type === 'borrowed') { %>
                       borrowed "<%= activity.book %>"
                     <% } else if (activity.type === 'returned') { %>

@@ -1,13 +1,13 @@
-# 📚 Library Management System
+# Library Management System
 
 A **full-stack Library Management System** built using **Node.js, Express, EJS, and MongoDB**, designed for the **library clerk** to manage books, members, issue/return operations, and fines.  
 This project showcases **DBMS principles**, **data modeling**, and **backend integration** through a professional, dashboard-style interface.
 
 ---
 
-## 🚀 Features
+## Features
 
-### 🧩 Core Functionalities
+### Core Functionalities
 
 - **Book Management**
   - Add, update, and delete books.
@@ -35,7 +35,7 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 
 ---
 
-## 🧠 DBMS Concepts Demonstrated
+## DBMS Concepts Demonstrated
 
 | **Concept** | **Implementation Example** |
 |--------------|-----------------------------|
@@ -50,7 +50,7 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 **Frontend**
 - EJS (Embedded JavaScript Templates)
@@ -68,7 +68,7 @@ This project showcases **DBMS principles**, **data modeling**, and **backend int
 - MongoDB Aggregation Framework
 
 
-## 📊 Dashboard Features
+## Dashboard Features
 
 **Aggregated MongoDB queries to display:**
 
